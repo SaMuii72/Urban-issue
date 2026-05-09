@@ -1,0 +1,130 @@
+import { motion } from 'framer-motion'
+import { Calendar, MapPin, ExternalLink, ArrowRight, ShieldAlert } from 'lucide-react'
+
+import { getCategoryStyles } from './Header'
+
+const Gallery = ({ events, selectedId, onSelect }) => {
+  const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date))
+  const formatTitle = (title) => {
+    if (!title) return ''
+    // Clean up long USGS earthquake titles
+    if (title.includes('แผ่นดินไหวขนาด')) {
+      const parts = title.split(' - ')
+      if (parts.length > 1) {
+        // "15 km SW of Smoky Lake, Canada" -> "Smoky Lake, Canada"
+        const cleanLocation = parts[1].replace(/.* of /, '')
+        return `${parts[0]} - ${cleanLocation}`
+      }
+    }
+    return title
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', paddingRight: '0.5rem' }}>
+      {sortedEvents.map((event, index) => {
+        const catStyle = getCategoryStyles(event.category)
+        
+        return (
+          <motion.div
+            key={index}
+            layout
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.01 }}
+            onClick={() => onSelect(event)}
+            className={`issue-card ${selectedId === event.title ? 'active' : ''}`}
+            style={{ 
+              borderRadius: '16px',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', gap: '0.4rem' }}>
+                <span className={`severity-tag severity-${event.severity || 'medium'}`}>
+                  {event.severity || 'Medium'}
+                </span>
+                <span style={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.2rem',
+                  padding: '0.25rem 0.6rem', 
+                  borderRadius: '9999px', 
+                  fontSize: '0.7rem', 
+                  fontWeight: 700, 
+                  textTransform: 'uppercase',
+                  background: catStyle.bg,
+                  color: catStyle.color,
+                  border: `1px solid ${catStyle.color}40`
+                }}>
+                  {catStyle.icon} {event.category}
+                </span>
+              </div>
+              <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                {event.source.replace('_', ' ').toUpperCase()}
+              </span>
+            </div>
+          
+          <h3 style={{ 
+            fontSize: '0.95rem', 
+            fontWeight: 700, 
+            color: '#1e293b',
+            marginBottom: '0.75rem', 
+            lineHeight: 1.4,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
+          }}>
+            {formatTitle(event.title)}
+          </h3>
+          
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', color: '#64748b', fontWeight: 500 }}>
+              <Calendar size={13} />
+              {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', color: '#64748b', fontWeight: 500 }}>
+              <MapPin size={13} />
+              {event.city || 'Global Location'}
+            </div>
+          </div>
+
+          {selectedId === event.title && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              style={{ marginTop: '1rem', borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}
+            >
+              <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '1.25rem', lineHeight: 1.6 }}>
+                {event.description}
+              </p>
+              <a 
+                href={event.source_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '0.4rem', 
+                  fontSize: '0.75rem', 
+                  color: 'white',
+                  background: 'var(--accent-primary)',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  fontWeight: 600
+                }}
+              >
+                Source Details <ExternalLink size={14} />
+              </a>
+            </motion.div>
+          )}
+        </motion.div>
+      )})}
+    </div>
+  )
+}
+
+export default Gallery
