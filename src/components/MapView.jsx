@@ -124,19 +124,21 @@ function SelectionController({ selectedEvent }) {
     if (!selectedEvent || !map) return
     
     const currentZoom = map.getZoom()
-    // Urban issues in Thailand need more zoom (15), global disasters (8)
-    const targetZoom = selectedEvent.country === 'Thailand' ? 15 : 8
+    const targetZoom = selectedEvent.country === 'Thailand' ? 15 : (currentZoom > 8 ? currentZoom : 8)
     
-    // 1. Fly to location only if we are not already close enough
-    // This prevents the "zoom out" bug when user clicks a marker they already zoomed into
+    // Calculate an offset so the marker is below the center (leaving room for the popup)
+    const targetPoint = map.project([selectedEvent.lat, selectedEvent.lng], targetZoom)
+    targetPoint.y -= 150 // Offset by 150 pixels up (moves map center up, marker down)
+    const offsetTarget = map.unproject(targetPoint, targetZoom)
+
+    // 1. Fly to location with offset
     if (currentZoom < targetZoom) {
-      map.flyTo([selectedEvent.lat, selectedEvent.lng], targetZoom, { duration: 1.4, easeLinearity: 0.3 })
+      map.flyTo(offsetTarget, targetZoom, { duration: 1.4, easeLinearity: 0.3 })
     } else {
-      // If already zoomed in, just pan to center smoothly without changing zoom
-      map.panTo([selectedEvent.lat, selectedEvent.lng], { animate: true, duration: 1.0 })
+      map.panTo(offsetTarget, { animate: true, duration: 1.0 })
     }
     
-    // 2. Try to open popup (Wait a bit for flyTo/panTo and clustering)
+    // 2. Try to open popup
     const timer = setTimeout(() => {
       map.eachLayer((layer) => {
         if (layer instanceof L.Marker) {
