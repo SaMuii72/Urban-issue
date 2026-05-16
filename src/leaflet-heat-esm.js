@@ -8,7 +8,7 @@
 function simpleheat(canvas) {
   if (!(this instanceof simpleheat)) return new simpleheat(canvas);
   this._canvas = canvas = typeof canvas === 'string' ? document.getElementById(canvas) : canvas;
-  this._ctx = canvas.getContext('2d');
+  this._ctx = canvas.getContext('2d', { willReadFrequently: true });
   this._width = canvas.width;
   this._height = canvas.height;
   this._max = 1;
@@ -26,7 +26,7 @@ simpleheat.prototype.clear = function ()    { this._data = [];    return this; }
 simpleheat.prototype.radius = function (r, blur) {
   blur = blur || 15;
   var circle = this._circle = document.createElement('canvas'),
-      ctx = circle.getContext('2d'),
+      ctx = circle.getContext('2d', { willReadFrequently: true }),
       r2 = this._r = r + blur;
   circle.width = circle.height = r2 * 2;
   ctx.shadowOffsetX = ctx.shadowOffsetY = 200;
@@ -41,7 +41,7 @@ simpleheat.prototype.radius = function (r, blur) {
 
 simpleheat.prototype.gradient = function (grad) {
   var canvas = document.createElement('canvas'),
-      ctx = canvas.getContext('2d'),
+      ctx = canvas.getContext('2d', { willReadFrequently: true }),
       gradient = ctx.createLinearGradient(0, 0, 0, 256);
   canvas.width = 1;
   canvas.height = 256;

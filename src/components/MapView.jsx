@@ -123,20 +123,33 @@ function SelectionController({ selectedEvent }) {
   useEffect(() => {
     if (!selectedEvent || !map) return
     
-    // 1. Fly to location
-    map.flyTo([selectedEvent.lat, selectedEvent.lng], 8, { duration: 1.4, easeLinearity: 0.3 })
+    const currentZoom = map.getZoom()
+    const targetZoom = selectedEvent.country === 'Thailand' ? 15 : (currentZoom > 8 ? currentZoom : 8)
     
-    // 2. Try to open popup (Wait a bit for flyTo and clustering)
+    // Calculate an offset so the marker is below the center (leaving room for the popup)
+    const targetPoint = map.project([selectedEvent.lat, selectedEvent.lng], targetZoom)
+    targetPoint.y -= 150 // Offset by 150 pixels up (moves map center up, marker down)
+    const offsetTarget = map.unproject(targetPoint, targetZoom)
+
+    // 1. Fly to location with offset
+    if (currentZoom < targetZoom) {
+      map.flyTo(offsetTarget, targetZoom, { duration: 1.4, easeLinearity: 0.3 })
+    } else {
+      map.panTo(offsetTarget, { animate: true, duration: 1.0 })
+    }
+    
+    // 2. Try to open popup
     const timer = setTimeout(() => {
       map.eachLayer((layer) => {
         if (layer instanceof L.Marker) {
           const { lat, lng } = layer.getLatLng()
-          if (lat === selectedEvent.lat && lng === selectedEvent.lng) {
+          // Use a small epsilon for coordinate matching
+          if (Math.abs(lat - selectedEvent.lat) < 0.0001 && Math.abs(lng - selectedEvent.lng) < 0.0001) {
             layer.openPopup()
           }
         }
       })
-    }, 1500)
+    }, 1200)
 
     return () => clearTimeout(timer)
   }, [selectedEvent, map])
