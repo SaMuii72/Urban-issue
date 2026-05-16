@@ -128,11 +128,12 @@ const Btn = ({ isActive, color, bg, onClick, children }) => (
 const Nav = ({ page, setPage }) => (
   <div style={{
     display: 'flex',
+    flexWrap: 'wrap',
     background: 'rgba(255,255,255,0.05)',
-    borderRadius: '999px', padding: '3px', gap: '2px',
+    borderRadius: '20px', padding: '3px', gap: '2px',
     flexShrink: 0, border: '1px solid rgba(255,255,255,0.07)'
   }}>
-    {[{ id: 'dashboard', label: 'Map' }, { id: 'story', label: 'Story' }, { id: 'analytics', label: 'Analytics' }].map(({ id, label }) => (
+    {[{ id: 'dashboard', label: 'Map' }, { id: 'chronicle', label: 'Chronicle' }, { id: 'story', label: 'Story' }, { id: 'analytics', label: 'Analytics' }].map(({ id, label }) => (
       <button key={id} onClick={() => setPage(id)} style={{
         padding: '0.3rem 0.9rem', borderRadius: '999px', border: 'none',
         background: page === id ? 'rgba(245,158,11,0.2)' : 'transparent',
@@ -142,6 +143,7 @@ const Nav = ({ page, setPage }) => (
         boxShadow: page === id ? '0 0 12px rgba(245,158,11,0.15)' : 'none',
         transition: 'all 0.2s ease', whiteSpace: 'nowrap',
         letterSpacing: '0.01em',
+        flex: '1 1 auto'
       }}>{label}</button>
     ))}
   </div>

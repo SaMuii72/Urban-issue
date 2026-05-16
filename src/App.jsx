@@ -8,6 +8,8 @@ import Header from './components/Header'
 import DataStory from './components/DataStory'
 import { useEvents } from './hook/useEvents'
 import Analytics from './components/Analytics'
+import Chronicle from './components/Chronicle'
+
 function App() {
   const { events, lastUpdated, loading, error, refresh } = useEvents()
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -138,6 +140,11 @@ function App() {
       ) : page === 'story' ? (
         <div className="glass page-content" style={{ flex: 1, overflowY: 'auto', borderRadius: '20px' }}>
           <DataStory events={events} />
+        </div>
+      ) : page === 'chronicle' ? (
+        // 🌟 เพิ่มเงื่อนไขนี้ เพื่อแสดงหน้า Historical Narrative เมื่อกดแท็บ History
+        <div className="page-content" style={{ flex: 1, overflowY: 'auto' }}>
+          <Chronicle />
         </div>
       ) : (
         <div className="glass page-content" style={{ flex: 1, overflowY: 'auto', borderRadius: '20px' }}>

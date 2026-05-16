@@ -4,7 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import logging
 
-from fetchers import usgs, gdacs, eonet
+from fetchers import usgs, gdacs, eonet, chronicles
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,6 +20,8 @@ app.add_middleware(
 
 # In-memory cache
 _cache = {"events": [], "fetched_at": None}
+
+_hist_cache = {"events": [], "fetched_at": None}
 
 
 def fetch_all():
@@ -53,6 +55,20 @@ def get_events():
         "events": _cache["events"],
         "total": len(_cache["events"]),
         "fetched_at": _cache["fetched_at"],
+    }
+
+
+@app.get("/api/chronicles")
+def get_historical_events():
+    if not _hist_cache["events"]:
+        logger.info("Generating crisis chronicles via Gemini...")
+        events = chronicles.fetch_and_generate_stories()
+        _hist_cache["events"] = events
+        _hist_cache["fetched_at"] = datetime.utcnow().isoformat() + "Z"
+        
+    return {
+        "events": _hist_cache["events"],
+        "fetched_at": _hist_cache["fetched_at"]
     }
 
 
