@@ -123,20 +123,31 @@ function SelectionController({ selectedEvent }) {
   useEffect(() => {
     if (!selectedEvent || !map) return
     
-    // 1. Fly to location
-    map.flyTo([selectedEvent.lat, selectedEvent.lng], 8, { duration: 1.4, easeLinearity: 0.3 })
+    const currentZoom = map.getZoom()
+    // Urban issues in Thailand need more zoom (15), global disasters (8)
+    const targetZoom = selectedEvent.country === 'Thailand' ? 15 : 8
     
-    // 2. Try to open popup (Wait a bit for flyTo and clustering)
+    // 1. Fly to location only if we are not already close enough
+    // This prevents the "zoom out" bug when user clicks a marker they already zoomed into
+    if (currentZoom < targetZoom) {
+      map.flyTo([selectedEvent.lat, selectedEvent.lng], targetZoom, { duration: 1.4, easeLinearity: 0.3 })
+    } else {
+      // If already zoomed in, just pan to center smoothly without changing zoom
+      map.panTo([selectedEvent.lat, selectedEvent.lng], { animate: true, duration: 1.0 })
+    }
+    
+    // 2. Try to open popup (Wait a bit for flyTo/panTo and clustering)
     const timer = setTimeout(() => {
       map.eachLayer((layer) => {
         if (layer instanceof L.Marker) {
           const { lat, lng } = layer.getLatLng()
-          if (lat === selectedEvent.lat && lng === selectedEvent.lng) {
+          // Use a small epsilon for coordinate matching
+          if (Math.abs(lat - selectedEvent.lat) < 0.0001 && Math.abs(lng - selectedEvent.lng) < 0.0001) {
             layer.openPopup()
           }
         }
       })
-    }, 1500)
+    }, 1200)
 
     return () => clearTimeout(timer)
   }, [selectedEvent, map])

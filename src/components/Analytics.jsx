@@ -109,7 +109,7 @@ export default function Analytics({ events }) {
       <div style={{ ...darkCard, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <div style={{ fontSize: 13, color: '#6e7d91', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>
-            UrbanWatch · Analytics
+            DisasterWatch · Analytics
           </div>
           <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#f1f5f9' }}>Overview</h2>
         </div>

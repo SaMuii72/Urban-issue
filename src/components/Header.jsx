@@ -10,7 +10,10 @@ export const getCategoryStyles = (category) => {
   if (cat.includes('landslide') || cat.includes('ดินโคลนถล่ม') || cat.includes('ดินถล่ม')) return { color: '#fcd34d', bg: 'rgba(180,83,9,0.2)', icon: <Mountain size={14} /> }
   if (cat.includes('electricity') || cat.includes('ไฟฟ้า')) return { color: '#fde68a', bg: 'rgba(245,158,11,0.15)', icon: <Zap size={14} /> }
   if (cat.includes('road') || cat.includes('ถนน') || cat.includes('ทางเท้า')) return { color: '#cbd5e1', bg: 'rgba(100,116,139,0.2)', icon: <MapPin size={14} /> }
-  if (cat.includes('tree') || cat.includes('ต้นไม้')) return { color: '#6ee7b7', bg: 'rgba(16,185,129,0.15)', icon: <TreePine size={14} /> }
+  if (cat.includes('tree') || cat === 'ต้นไม้') return { color: '#6ee7b7', bg: 'rgba(16,185,129,0.15)', icon: <TreePine size={14} /> }
+  if (cat.includes('accident') || cat === 'อุบัติเหตุ') return { color: '#f87171', bg: 'rgba(239,68,68,0.2)', icon: <ShieldAlert size={14} /> }
+  if (cat.includes('traffic') || cat === 'รถติด') return { color: '#fb923c', bg: 'rgba(249,115,22,0.15)', icon: <Activity size={14} /> }
+  if (cat.includes('infrastructure') || cat === 'โครงสร้างพื้นฐาน') return { color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', icon: <MapPin size={14} /> }
   const colors = [
     { color: '#c4b5fd', bg: 'rgba(139,92,246,0.15)' },
     { color: '#f9a8d4', bg: 'rgba(236,72,153,0.15)' },
@@ -154,8 +157,8 @@ const Logo = () => (
       <Radar color="#fff" size={18} />
     </div>
     <div>
-      <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f1f5f9', lineHeight: 1.1, letterSpacing: '-0.02em' }}>UrbanWatch</h1>
-      <p style={{ fontSize: '0.65rem', color: '#7a8a9e', fontWeight: 500, marginTop: '2px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Monitoring Dashboard</p>
+      <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f1f5f9', lineHeight: 1.1, letterSpacing: '-0.02em' }}>DisasterWatch</h1>
+      <p style={{ fontSize: '0.65rem', color: '#7a8a9e', fontWeight: 500, marginTop: '2px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Global Crisis Monitor</p>
     </div>
   </div>
 )
@@ -177,9 +180,21 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
   }, [])
 
   const uniqueCategories = [...new Set(events.map(e => e.category))].filter(Boolean)
+  
+  // Priority for major disasters to show first
+  const disasterPriority = ['earthquake', 'flood', 'fire', 'storm', 'volcano']
+  const sortedCategories = uniqueCategories.sort((a, b) => {
+    const aIndex = disasterPriority.indexOf(a.toLowerCase())
+    const bIndex = disasterPriority.indexOf(b.toLowerCase())
+    if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex
+    if (aIndex !== -1) return -1
+    if (bIndex !== -1) return 1
+    return a.localeCompare(b)
+  })
+
   const categories = [
     { id: 'all', label: 'All', icon: <LayoutGrid size={14} />, color: '#f59e0b', bg: 'rgba(245,158,11,0.15)' },
-    ...uniqueCategories.map(cat => ({ id: cat, label: cat.charAt(0).toUpperCase() + cat.slice(1), ...getCategoryStyles(cat) }))
+    ...sortedCategories.map(cat => ({ id: cat, label: cat.charAt(0).toUpperCase() + cat.slice(1), ...getCategoryStyles(cat) }))
   ]
   const severities = [
     { id: 'all', label: 'All', color: null },
