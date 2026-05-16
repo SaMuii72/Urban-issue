@@ -9,6 +9,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+      args:
+        - VITE_MAPBOX_TOKEN=${VITE_MAPBOX_TOKEN}
     restart: unless-stopped
     ports:
       - "3000:80"

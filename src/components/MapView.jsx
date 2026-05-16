@@ -12,7 +12,7 @@ registerHeatLayer(L)
 // หากไม่ใส่ หรือเป็นค่าเริ่มต้น ระบบจะใช้แผนที่ดาวเทียมของ Google แทน
 const MAPBOX_USERNAME = 'mapbox'
 const MAPBOX_STYLE_ID = 'satellite-streets-v12'
-const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1Ijoic2FtdWlpNzIiLCJhIjoiY21wODNxOGcyMWJsMDJ0cXo4eTMwZjhodCJ9.c3KO2K7amoAua-T-cTPq7A' // เช่น 'pk.ey...'
+const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
 // ────────────────────────────────────────────────────────────────
 
 // ── Risk Zone layer ─────────────────────────────────────────────
