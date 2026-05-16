@@ -1,22 +1,20 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LayoutGrid, ChevronLeft, Menu, X, BookOpen, Map } from 'lucide-react'
+import { LayoutGrid, ChevronLeft, Menu, X } from 'lucide-react'
 import MapView from './components/MapView'
 import Gallery from './components/Gallery'
 import Stats from './components/Stats'
 import Header from './components/Header'
-import EventModal from './components/EventModal'
-import DataStory from './components/DataStory'  // เพิ่มบรรทัดนี้
+import DataStory from './components/DataStory'
 import { useEvents } from './hook/useEvents'
 import Analytics from './components/Analytics'
 function App() {
   const { events, lastUpdated, loading, error, refresh } = useEvents()
-const [selectedEvent, setSelectedEvent] = useState(null)
+  const [selectedEvent, setSelectedEvent] = useState(null)
   const [filter, setFilter] = useState('all')
   const [severityFilter, setSeverityFilter] = useState('all')
   const [isGalleryOpen, setIsGalleryOpen] = useState(true)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [page, setPage] = useState('dashboard')  // เพิ่มบรรทัดนี้
+  const [page, setPage] = useState('dashboard')
 
   useEffect(() => {
   if (window.innerWidth <= 768) {
@@ -32,7 +30,6 @@ const [selectedEvent, setSelectedEvent] = useState(null)
 
   const handleSelectEvent = (event) => {
     setSelectedEvent(event)
-    setIsModalOpen(true)
     if (window.innerWidth <= 768) setIsGalleryOpen(false)
   }
 
@@ -122,11 +119,7 @@ const [selectedEvent, setSelectedEvent] = useState(null)
         </div>
       )}
 
-      <AnimatePresence>
-        {isModalOpen && (
-          <EventModal event={selectedEvent} onClose={() => setIsModalOpen(false)} />
-        )}
-      </AnimatePresence>
+      <AnimatePresence />
     </div>
   )
 }

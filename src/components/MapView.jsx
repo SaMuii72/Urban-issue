@@ -3,6 +3,8 @@ import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import { useEffect, useRef, useMemo } from 'react'
 import { registerHeatLayer } from '../leaflet-heat-esm'
+import { getCategoryStyles } from './Header'
+import { MapPin, Calendar, Navigation, ExternalLink, Satellite } from 'lucide-react'
 
 // Register the heat plugin onto the ESM Leaflet instance (runs once)
 registerHeatLayer(L)
@@ -108,8 +110,10 @@ const createClusterIcon = (cluster) => {
 // ── Per-marker icon (solid coloured dot) ────────────────────────
 const getMarkerIcon = (severity) =>
   L.divIcon({
+    html: '<div class="marker-core"></div>',
     className: `marker-severity-${severity || 'medium'}`,
     iconSize: L.point(14, 14),
+    iconAnchor: L.point(7, 7),
   })
 
 // ── Smooth fly-to and Open Popup when user selects an event ─────
@@ -182,44 +186,93 @@ export default function MapView({ events, selectedEvent, onMarkerClick }) {
         showCoverageOnHover={false}
         iconCreateFunction={createClusterIcon}
       >
-        {events.map((event, idx) => (
-          <Marker
-            key={idx}
-            position={[event.lat, event.lng]}
-            icon={getMarkerIcon(event.severity)}
-            eventHandlers={{ click: () => onMarkerClick(event) }}
-          >
-            <Popup className="modern-popup">
-              <div style={{ padding: '0.2rem', minWidth: '220px' }}>
-                <strong style={{ fontSize: '1rem', display: 'block', marginBottom: '0.4rem', color: '#f1f5f9', fontWeight: 800, lineHeight: 1.2 }}>
-                  {formatTitle(event.title)}
-                </strong>
-                <div style={{ fontSize: '0.75rem', color: '#b4bcc8', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                  {event.city ? `${event.city}, ` : ''}{event.country || 'Global Location'}
+        {events.map((event, idx) => {
+          const catStyle = getCategoryStyles(event.category)
+          const isHigh = event.severity === 'high' || event.severity === 'critical'
+          return (
+            <Marker
+              key={idx}
+              position={[event.lat, event.lng]}
+              icon={getMarkerIcon(event.severity)}
+              eventHandlers={{ click: () => onMarkerClick && onMarkerClick(event) }}
+            >
+              <Popup className="modern-popup" maxWidth={400}>
+                <div style={{ minWidth: 'min(360px, 92vw)', fontFamily: 'inherit', borderRadius: 16, overflow: 'hidden' }}>
+
+                  {/* Header */}
+                  <div style={{
+                    borderLeft: `4px solid ${catStyle.color}`,
+                    padding: '1rem 1.25rem 0.875rem',
+                    background: `linear-gradient(135deg, ${catStyle.color}20 0%, transparent 100%)`,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      <div style={{
+                        background: `${catStyle.color}25`,
+                        color: catStyle.color,
+                        borderRadius: 8, padding: '5px 7px',
+                        display: 'flex', flexShrink: 0
+                      }}>
+                        {catStyle.icon}
+                      </div>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: catStyle.color, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                        {event.category}
+                      </span>
+                      <div className="popup-severity-badge" style={{
+                        marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4,
+                        fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase',
+                        padding: '2px 7px', borderRadius: 999,
+                        background: isHigh ? 'rgba(239,68,68,0.2)' : event.severity === 'low' ? 'rgba(34,197,94,0.2)' : 'rgba(245,158,11,0.2)',
+                        color: isHigh ? '#fca5a5' : event.severity === 'low' ? '#86efac' : '#fcd34d',
+                        border: `1px solid ${isHigh ? 'rgba(239,68,68,0.4)' : event.severity === 'low' ? 'rgba(34,197,94,0.4)' : 'rgba(245,158,11,0.4)'}`,
+                      }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: isHigh ? '#ef4444' : event.severity === 'low' ? '#22c55e' : '#f59e0b', display: 'inline-block', flexShrink: 0 }} />
+                        {event.severity}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f1f5f9', lineHeight: 1.4 }}>
+                      {formatTitle(event.title)}
+                    </div>
+                  </div>
+
+                  {/* Meta rows */}
+                  <div style={{ padding: '0.875rem 1.25rem', display: 'flex', flexDirection: 'column', gap: 8, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                    {[
+                      { Icon: MapPin, text: [event.city, event.country].filter(Boolean).join(', ') || 'Global Location', color: '#60a5fa' },
+                      { Icon: Calendar, text: event.date ? new Date(event.date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : null, color: '#a78bfa' },
+                      { Icon: Satellite, text: event.source, color: '#34d399' },
+                      { Icon: Navigation, text: event.lat != null ? `${event.lat.toFixed(2)}°, ${event.lng.toFixed(2)}°` : null, color: '#94a3b8' },
+                    ].filter(r => r.text).map(({ Icon, text, color }, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, fontSize: '0.88rem', color: '#cbd5e1' }}>
+                        <Icon size={15} color={color} style={{ flexShrink: 0, marginTop: 2 }} />
+                        <span style={{ lineHeight: 1.45 }}>{text}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Description + link */}
+                  {(event.description || event.source_url) && (
+                    <div style={{ padding: '0.75rem 1.25rem 1rem', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                      {event.description && (
+                        <p style={{ margin: '0 0 10px', fontSize: '0.88rem', color: '#94a3b8', lineHeight: 1.7 }}>
+                          {event.description.slice(0, 160)}{event.description.length > 160 ? '…' : ''}
+                        </p>
+                      )}
+                      {event.source_url && (
+                        <a href={event.source_url} target="_blank" rel="noopener noreferrer"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: '0.85rem', fontWeight: 600, color: '#f1f5f9', textDecoration: 'none',
+                            background: 'rgba(255,255,255,0.08)', padding: '5px 12px', borderRadius: 8,
+                            border: '1px solid rgba(255,255,255,0.12)', transition: 'all 0.2s' }}
+                        >
+                          <ExternalLink size={13} /> View Full Data
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '0.7rem', fontWeight: 700,
-                  textTransform: 'uppercase', letterSpacing: '0.05em',
-                  padding: '0.3rem 0.75rem', borderRadius: '9999px',
-                  background: event.severity === 'high' ? '#fee2e2' : '#fef3c7',
-                  color: event.severity === 'high' ? '#991b1b' : '#92400e',
-                  border: `1px solid ${event.severity === 'high' ? '#fca5a5' : '#fcd34d'}`
-                }}>
-                  <span style={{
-                    width: '6px', height: '6px', borderRadius: '50%',
-                    background: event.severity === 'high' ? '#ef4444' : '#f59e0b', display: 'inline-block',
-                    boxShadow: `0 0 8px ${event.severity === 'high' ? '#ef4444' : '#f59e0b'}`
-                  }} />
-                  {event.severity} · {event.category}
-                </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+              </Popup>
+            </Marker>
+          )
+        })}
       </MarkerClusterGroup>
 
       <SelectionController selectedEvent={selectedEvent} />
