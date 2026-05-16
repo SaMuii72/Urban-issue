@@ -3,26 +3,26 @@ const Stats = ({ events }) => {
   const total = events.length
 
   return (
-    <div className="header-stats" style={{ display: 'flex', gap: '1rem' }}>
-      <div style={{ 
-        minWidth: '110px',
-        padding: '0.5rem 0.75rem', 
-        borderLeft: '3px solid var(--accent-primary)',
-        background: 'rgba(14, 165, 233, 0.05)',
-        borderRadius: '0 8px 8px 0'
+    <div className="header-stats" style={{ display: 'flex', gap: '0.75rem' }}>
+      <div style={{
+        minWidth: '100px',
+        padding: '0.5rem 0.85rem',
+        borderLeft: '2px solid rgba(245, 158, 11, 0.6)',
+        background: 'rgba(245, 158, 11, 0.06)',
+        borderRadius: '0 10px 10px 0'
       }}>
-        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>{total}</div>
-        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>Total Events</div>
+        <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#fcd34d', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{total}</div>
+        <div style={{ fontSize: '0.6rem', color: '#7a8a9e', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '3px' }}>Total Events</div>
       </div>
-      <div style={{ 
-        minWidth: '110px',
-        padding: '0.5rem 0.75rem', 
-        borderLeft: '3px solid var(--danger)',
-        background: 'rgba(225, 29, 72, 0.05)',
-        borderRadius: '0 8px 8px 0'
+      <div style={{
+        minWidth: '100px',
+        padding: '0.5rem 0.85rem',
+        borderLeft: '2px solid rgba(239, 68, 68, 0.6)',
+        background: 'rgba(239, 68, 68, 0.06)',
+        borderRadius: '0 10px 10px 0'
       }}>
-        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>{highSeverity}</div>
-        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>Critical</div>
+        <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#fca5a5', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{highSeverity}</div>
+        <div style={{ fontSize: '0.6rem', color: '#7a8a9e', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '3px' }}>Critical</div>
       </div>
     </div>
   )

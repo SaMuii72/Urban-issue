@@ -5,20 +5,26 @@ import {
 } from 'recharts'
 
 const COLORS = {
-  fire: '#ef4444', earthquake: '#8b5cf6', storm: '#0ea5e9',
-  flood: '#3b82f6', landslide: '#92400e', volcano: '#dc2626',
-  drought: '#ca8a04', other: '#94a3b8',
+  fire: '#ef4444', earthquake: '#8b5cf6', storm: '#60a5fa',
+  flood: '#38bdf8', landslide: '#d97706', volcano: '#dc2626',
+  drought: '#f59e0b', other: '#64748b',
 }
-const SEV_COLORS = { critical: '#dc2626', high: '#f97316', medium: '#f59e0b', low: '#22c55e' }
+const SEV_COLORS = { critical: '#ef4444', high: '#f97316', medium: '#f59e0b', low: '#10b981' }
 
-const card = {
-  background: 'rgba(255,255,255,0.6)',
+const darkCard = {
+  background: 'rgba(255,255,255,0.04)',
   backdropFilter: 'blur(12px)',
   WebkitBackdropFilter: 'blur(12px)',
-  border: '1px solid rgba(226,232,240,0.8)',
+  border: '1px solid rgba(255,255,255,0.08)',
   borderRadius: 20,
   padding: '1.25rem',
-  boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+}
+
+const tooltipStyle = {
+  fontSize: 12, borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)',
+  background: '#1e293b', color: '#f1f5f9',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.4)'
 }
 
 export default function Analytics({ events }) {
@@ -94,25 +100,21 @@ export default function Analytics({ events }) {
     return { categoryData, severityData, topCountries, timeline, sourceData, monthlyPattern, dowPattern, total: events.length }
   }, [events])
 
-  if (!stats) return <div style={{ padding: '2rem', color: '#64748b' }}>Loading...</div>
-
-  const tooltipStyle = { fontSize: 12, borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }
+  if (!stats) return <div style={{ padding: '2rem', color: '#6e7d91' }}>Loading...</div>
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-      {/* Header */}
-      <div style={{ ...card, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      {/* Header Card */}
+      <div style={{ ...darkCard, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <div style={{ fontSize: 11, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>
+          <div style={{ fontSize: 13, color: '#6e7d91', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>
             UrbanWatch · Analytics
           </div>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: '#0f172a' }}>
-            Overview
-          </h2>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#f1f5f9' }}>Overview</h2>
         </div>
-        <div style={{ fontSize: 13, color: '#64748b' }}>
-          <span style={{ fontWeight: 600, color: '#0f172a', fontSize: 22 }}>{stats.total}</span>
+        <div style={{ fontSize: 15, color: '#6e7d91' }}>
+          <span style={{ fontWeight: 800, color: '#fcd34d', fontSize: 32 }}>{stats.total}</span>
           <span style={{ marginLeft: 6 }}>เหตุการณ์</span>
         </div>
       </div>
@@ -121,11 +123,11 @@ export default function Analytics({ events }) {
       <Card title="เหตุการณ์ตามวัน" sub="14 วันล่าสุด">
         <ResponsiveContainer width="100%" height={160}>
           <LineChart data={stats.timeline} margin={{ top: 4, right: 16, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+            <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#7a8a9e' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 12, fill: '#7a8a9e' }} axisLine={false} tickLine={false} />
             <Tooltip formatter={(val) => [`${val} เหตุการณ์`, '']} contentStyle={tooltipStyle} />
-            <Line type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={2} dot={{ r: 3, fill: '#6366f1' }} />
+            <Line type="monotone" dataKey="count" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3, fill: '#f59e0b' }} />
           </LineChart>
         </ResponsiveContainer>
       </Card>
@@ -135,11 +137,11 @@ export default function Analytics({ events }) {
         <Card title="ประเภทภัยพิบัติ" sub="จำนวนแยกตาม category">
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={stats.categoryData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#7a8a9e' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: '#7a8a9e' }} axisLine={false} tickLine={false} />
               <Tooltip formatter={(val) => [`${val} เหตุการณ์`]} contentStyle={tooltipStyle} />
               <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                {stats.categoryData.map(e => <Cell key={e.name} fill={COLORS[e.name] || '#94a3b8'} />)}
+                {stats.categoryData.map(e => <Cell key={e.name} fill={COLORS[e.name] || '#64748b'} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -152,7 +154,7 @@ export default function Analytics({ events }) {
                 cx="50%" cy="50%" outerRadius={65} innerRadius={30}
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 labelLine={false} fontSize={11}>
-                {stats.severityData.map(e => <Cell key={e.name} fill={SEV_COLORS[e.name] || '#94a3b8'} />)}
+                {stats.severityData.map(e => <Cell key={e.name} fill={SEV_COLORS[e.name] || '#64748b'} />)}
               </Pie>
               <Tooltip formatter={(val) => [`${val} เหตุการณ์`]} contentStyle={tooltipStyle} />
             </PieChart>
@@ -164,23 +166,23 @@ export default function Analytics({ events }) {
       <Card title="Top 10 ประเทศที่ได้รับผลกระทบ" sub="นับตามจำนวนเหตุการณ์">
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={stats.topCountries} layout="vertical" margin={{ top: 0, right: 16, left: 80, bottom: 0 }}>
-            <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-            <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: '#64748b' }} width={80} axisLine={false} tickLine={false} />
+            <XAxis type="number" tick={{ fontSize: 12, fill: '#7a8a9e' }} axisLine={false} tickLine={false} />
+            <YAxis dataKey="name" type="category" tick={{ fontSize: 12, fill: '#64748b' }} width={80} axisLine={false} tickLine={false} />
             <Tooltip formatter={(val) => [`${val} เหตุการณ์`]} contentStyle={tooltipStyle} />
-            <Bar dataKey="count" fill="#6366f1" radius={[0, 6, 6, 0]} />
+            <Bar dataKey="count" fill="#f59e0b" radius={[0, 6, 6, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Card>
 
-      {/* Temporal Pattern */}
+      {/* Temporal */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         <Card title="รายเดือน" sub="12 เดือนล่าสุด">
           <ResponsiveContainer width="100%" height={160}>
             <BarChart data={stats.monthlyPattern} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-              <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#7a8a9e' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: '#7a8a9e' }} axisLine={false} tickLine={false} />
               <Tooltip formatter={(val) => [`${val} เหตุการณ์`]} contentStyle={tooltipStyle} />
-              <Bar dataKey="count" fill="#6366f1" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="count" fill="#d97706" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -188,10 +190,10 @@ export default function Analytics({ events }) {
         <Card title="รายวันในสัปดาห์" sub="pattern รายวัน">
           <ResponsiveContainer width="100%" height={160}>
             <BarChart data={stats.dowPattern} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-              <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#7a8a9e' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: '#7a8a9e' }} axisLine={false} tickLine={false} />
               <Tooltip formatter={(val) => [`${val} เหตุการณ์`]} contentStyle={tooltipStyle} />
-              <Bar dataKey="count" fill="#0ea5e9" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="count" fill="#ef4444" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -204,12 +206,12 @@ export default function Analytics({ events }) {
             const pct = Math.round((s.value / stats.total) * 100)
             return (
               <div key={s.name}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6 }}>
-                  <span style={{ color: '#475569', fontWeight: 500 }}>{s.name}</span>
-                  <span style={{ color: '#94a3b8' }}>{s.value} ({pct}%)</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 6 }}>
+                  <span style={{ color: '#b4bcc8', fontWeight: 500 }}>{s.name}</span>
+                  <span style={{ color: '#6e7d91' }}>{s.value} ({pct}%)</span>
                 </div>
-                <div style={{ height: 5, background: '#f1f5f9', borderRadius: 99 }}>
-                  <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #6366f1, #0ea5e9)', borderRadius: 99, transition: 'width 0.6s ease' }} />
+                <div style={{ height: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 99 }}>
+                  <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #f59e0b, #ef4444)', borderRadius: 99, transition: 'width 0.6s ease' }} />
                 </div>
               </div>
             )
@@ -224,17 +226,16 @@ export default function Analytics({ events }) {
 function Card({ title, sub, children }) {
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.6)',
+      background: 'rgba(255,255,255,0.04)',
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
-      border: '1px solid rgba(226,232,240,0.8)',
-      borderRadius: 20,
-      padding: '1.25rem',
-      boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: 20, padding: '1.25rem',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
     }}>
       <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>{title}</div>
-        <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>{sub}</div>
+        <div style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9' }}>{title}</div>
+        <div style={{ fontSize: 13, color: '#6e7d91', marginTop: 2 }}>{sub}</div>
       </div>
       {children}
     </div>

@@ -38,8 +38,8 @@ const [selectedEvent, setSelectedEvent] = useState(null)
 
   if (loading) return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, background: 'var(--bg-color)' }}>
-      <div style={{ width: 40, height: 40, border: '3px solid #e2e8f0', borderTop: '3px solid #0ea5e9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      <p style={{ fontSize: 14, color: '#64748b' }}>กำลังโหลดข้อมูล...</p>
+      <div style={{ width: 40, height: 40, border: '3px solid rgba(255,255,255,0.08)', borderTop: '3px solid #f59e0b', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <p style={{ fontSize: 14, color: '#94a3b8' }}>กำลังโหลดข้อมูล...</p>
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>
   )
@@ -47,9 +47,9 @@ const [selectedEvent, setSelectedEvent] = useState(null)
   if (error) return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, background: 'var(--bg-color)' }}>
       <div style={{ fontSize: 40 }}>⚠️</div>
-      <p style={{ fontSize: 16, fontWeight: 600, color: '#0f172a' }}>ไม่สามารถเชื่อมต่อ server ได้</p>
+      <p style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9' }}>ไม่สามารถเชื่อมต่อ server ได้</p>
       <p style={{ fontSize: 13, color: '#94a3b8' }}>{error}</p>
-      <button onClick={refresh} style={{ padding: '8px 20px', borderRadius: 10, border: 'none', background: '#0ea5e9', color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: 13 }}>
+      <button onClick={refresh} style={{ padding: '8px 20px', borderRadius: 10, border: 'none', background: '#f59e0b', color: '#0d1117', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>
         ลองใหม่
       </button>
     </div>
@@ -68,29 +68,9 @@ const [selectedEvent, setSelectedEvent] = useState(null)
     }}>
       <Header
         events={events}
-        stats={
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Stats events={events} />
-            <div style={{ fontSize: 11, color: '#94a3b8', textAlign: 'right', lineHeight: 1.4 }}>
-              <div>Last updated</div>
-              <div style={{ fontWeight: 600, color: '#64748b' }}>
-                {lastUpdated
-                  ? lastUpdated.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
-                  : 'Loading...'}
-              </div>
-            </div>
-            <button
-              onClick={refresh}
-              style={{
-                fontSize: 11, padding: '4px 10px', borderRadius: 6,
-                border: '1px solid #e2e8f0', background: 'white',
-                color: '#64748b', cursor: 'pointer', fontWeight: 600,
-              }}
-            >
-              ↻ Refresh
-            </button>
-          </div>
-        }
+        StatsComponent={<Stats events={events} />}
+        lastUpdated={lastUpdated}
+        onRefresh={refresh}
         filter={filter}
         setFilter={setFilter}
         severityFilter={severityFilter}
@@ -110,12 +90,12 @@ const [selectedEvent, setSelectedEvent] = useState(null)
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <LayoutGrid size={16} color="var(--accent-primary)" />
-                <span style={{ fontWeight: 700, fontSize: '0.8rem', color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span style={{ fontWeight: 700, fontSize: '0.8rem', color: '#f1f5f9', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Incident Gallery
                 </span>
               </div>
               <button onClick={() => setIsGalleryOpen(false)}
-                style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', color: '#7a8a9e' }}
                 className="d-md-none">
                 <X size={18} />
               </button>

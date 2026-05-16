@@ -5,9 +5,9 @@ import {
 } from 'recharts'
 
 const COLORS = {
-  fire: '#ef4444', earthquake: '#8b5cf6', storm: '#0ea5e9',
-  flood: '#3b82f6', landslide: '#92400e', volcano: '#dc2626',
-  drought: '#ca8a04', other: '#94a3b8',
+  fire: '#ef4444', earthquake: '#8b5cf6', storm: '#60a5fa',
+  flood: '#38bdf8', landslide: '#d97706', volcano: '#dc2626',
+  drought: '#f59e0b', other: '#64748b',
 }
 
 const DEVELOPING = new Set([
@@ -19,20 +19,25 @@ const DEVELOPING = new Set([
 ])
 
 const SEVERITY_COLORS = {
-  critical: '#dc2626', high: '#f97316', medium: '#f59e0b', low: '#22c55e'
+  critical: '#ef4444', high: '#f97316', medium: '#f59e0b', low: '#10b981'
 }
 
-const glassCard = {
-  background: 'rgba(255,255,255,0.6)',
+const darkCard = {
+  background: 'rgba(255,255,255,0.04)',
   backdropFilter: 'blur(12px)',
   WebkitBackdropFilter: 'blur(12px)',
-  border: '1px solid rgba(226,232,240,0.8)',
+  border: '1px solid rgba(255,255,255,0.08)',
   borderRadius: 20,
   padding: '1.25rem',
-  boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
 }
 
-const tooltipStyle = { fontSize: 12, borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }
+const tooltipStyle = {
+  fontSize: 12, borderRadius: 12,
+  border: '1px solid rgba(255,255,255,0.1)',
+  background: '#1e293b', color: '#f1f5f9',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.4)'
+}
 
 export default function DataStory({ events }) {
   const stats = useMemo(() => {
@@ -91,43 +96,44 @@ export default function DataStory({ events }) {
     }
   }, [events])
 
-  if (!stats) return <div style={{ padding: '2rem', color: '#64748b', textAlign: 'center' }}>Loading...</div>
+  if (!stats) return <div style={{ padding: '2rem', color: '#7a8a9e', textAlign: 'center' }}>Loading...</div>
 
   return (
     <div style={{ maxWidth: 860, margin: '0 auto', padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
       {/* Hero */}
       <div style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
-        borderRadius: 20, padding: '1.75rem 2rem', color: 'white',
+        background: 'linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(239,68,68,0.08) 60%, rgba(255,255,255,0.02) 100%)',
+        borderRadius: 24, padding: '2rem',
         position: 'relative', overflow: 'hidden',
-        boxShadow: '0 8px 32px rgba(15,23,42,0.2)',
+        border: '1px solid rgba(245,158,11,0.2)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
       }}>
-        <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '50%', background: 'rgba(99,102,241,0.15)' }} />
-        <div style={{ position: 'absolute', bottom: -40, left: '30%', width: 160, height: 160, borderRadius: '50%', background: 'rgba(14,165,233,0.1)' }} />
-        <p style={{ fontSize: 11, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 10px' }}>
+        <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '50%', background: 'rgba(245,158,11,0.08)', filter: 'blur(40px)' }} />
+        <div style={{ position: 'absolute', bottom: -40, left: '30%', width: 160, height: 160, borderRadius: '50%', background: 'rgba(239,68,68,0.06)', filter: 'blur(30px)' }} />
+        <p style={{ fontSize: 13, color: '#7a8a9e', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 10px' }}>
           CPE 494 · Humanities Computing · Data Story
         </p>
-        <h1 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 10px', lineHeight: 1.4 }}>
+        <h1 style={{ fontSize: 26, fontWeight: 700, margin: '0 0 10px', lineHeight: 1.4, color: '#f1f5f9' }}>
           เบื้องหลังตัวเลข:<br />ภัยพิบัติกับความเหลื่อมล้ำของโลก
         </h1>
-        <p style={{ opacity: 0.6, fontSize: 13, lineHeight: 1.8, maxWidth: 520, margin: 0 }}>
-          จากข้อมูลภัยพิบัติ <strong style={{ color: 'white', opacity: 1 }}>{stats.total} เหตุการณ์</strong> ที่รวบรวมแบบ real-time
-          จาก USGS — ตัวเลขเหล่านี้สะท้อนว่า <em>ใคร</em> ได้รับผลกระทบมากที่สุด
+        <p style={{ color: '#94a3b8', fontSize: 16, lineHeight: 1.8, maxWidth: 520, margin: 0 }}>
+          จากข้อมูลภัยพิบัติ <strong style={{ color: '#fcd34d' }}>{stats.total} เหตุการณ์</strong> ที่รวบรวมแบบ real-time
+          จาก USGS — ตัวเลขเหล่านี้สะท้อนว่า <em style={{ color: '#94a3b8' }}>ใคร</em> ได้รับผลกระทบมากที่สุด
         </p>
       </div>
 
       {/* Key Insights */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
         {[
-          { number: `${stats.developingPct}%`, label: 'เกิดในประเทศกำลังพัฒนา', sub: `จาก ${stats.withCountryCount} เหตุการณ์`, color: '#3b82f6' },
+          { number: `${stats.developingPct}%`, label: 'เกิดในประเทศกำลังพัฒนา', sub: `จาก ${stats.withCountryCount} เหตุการณ์`, color: '#60a5fa' },
           { number: `${stats.seriousPct}%`, label: 'ระดับ High / Critical', sub: 'ต้องการการตอบสนองเร่งด่วน', color: '#ef4444' },
-          { number: `${stats.topCatPct}%`, label: `ประเภท "${stats.topCat}"`, sub: 'พบมากที่สุดในช่วงนี้', color: COLORS[stats.topCat] || '#f97316' },
+          { number: `${stats.topCatPct}%`, label: `ประเภท "${stats.topCat}"`, sub: 'พบมากที่สุดในช่วงนี้', color: COLORS[stats.topCat] || '#f59e0b' },
         ].map((item, i) => (
-          <div key={i} style={{ ...glassCard, borderTop: `3px solid ${item.color}` }}>
-            <div style={{ fontSize: 28, fontWeight: 600, color: item.color, lineHeight: 1, marginBottom: 6 }}>{item.number}</div>
-            <div style={{ fontSize: 12, fontWeight: 500, color: '#1e293b', marginBottom: 3 }}>{item.label}</div>
-            <div style={{ fontSize: 11, color: '#94a3b8' }}>{item.sub}</div>
+          <div key={i} style={{ ...darkCard, borderTop: `2px solid ${item.color}40`, paddingTop: '1.25rem' }}>
+            <div style={{ fontSize: 36, fontWeight: 800, color: item.color, lineHeight: 1, marginBottom: 6 }}>{item.number}</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#b4bcc8', marginBottom: 3 }}>{item.label}</div>
+            <div style={{ fontSize: 13, color: '#6e7d91' }}>{item.sub}</div>
           </div>
         ))}
       </div>
@@ -135,20 +141,20 @@ export default function DataStory({ events }) {
       {/* Spotlight */}
       {stats.spotlight && (
         <div style={{
-          ...glassCard,
-          borderLeft: `3px solid ${SEVERITY_COLORS[stats.spotlight.severity] || '#94a3b8'}`,
+          ...darkCard,
+          borderLeft: `2px solid ${SEVERITY_COLORS[stats.spotlight.severity] || '#64748b'}`,
           borderRadius: 20,
         }}>
-          <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: SEVERITY_COLORS[stats.spotlight.severity], marginBottom: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: SEVERITY_COLORS[stats.spotlight.severity], marginBottom: 8 }}>
             Event Spotlight · {stats.spotlight.severity?.toUpperCase()}
           </div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', lineHeight: 1.5, marginBottom: 8 }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#f1f5f9', lineHeight: 1.5, marginBottom: 8 }}>
             {stats.spotlight.title}
           </div>
-          <p style={{ margin: '0 0 10px', fontSize: 12, color: '#475569', lineHeight: 1.7 }}>
+          <p style={{ margin: '0 0 10px', fontSize: 15, color: '#94a3b8', lineHeight: 1.7 }}>
             {stats.spotlight.description}
           </p>
-          <div style={{ display: 'flex', gap: 16, fontSize: 11, color: '#94a3b8' }}>
+          <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#7a8a9e' }}>
             {stats.spotlight.city && <span>📍 {stats.spotlight.city}{stats.spotlight.country ? `, ${stats.spotlight.country}` : ''}</span>}
             {stats.spotlight.date && <span>🗓 {new Date(stats.spotlight.date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
             <span>📂 {stats.spotlight.category}</span>
@@ -161,11 +167,11 @@ export default function DataStory({ events }) {
         <Card title="ประเภทภัยพิบัติ" sub="จำนวนแยกตามประเภท">
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={stats.categoryData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#7a8a9e' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: '#7a8a9e' }} axisLine={false} tickLine={false} />
               <Tooltip formatter={(val) => [`${val} เหตุการณ์`]} contentStyle={tooltipStyle} />
               <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                {stats.categoryData.map(e => <Cell key={e.name} fill={COLORS[e.name] || '#94a3b8'} />)}
+                {stats.categoryData.map(e => <Cell key={e.name} fill={COLORS[e.name] || '#64748b'} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -178,7 +184,7 @@ export default function DataStory({ events }) {
                 cx="50%" cy="50%" outerRadius={65} innerRadius={30}
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 labelLine={false} fontSize={11}>
-                {stats.severityData.map(e => <Cell key={e.name} fill={SEVERITY_COLORS[e.name] || '#94a3b8'} />)}
+                {stats.severityData.map(e => <Cell key={e.name} fill={SEVERITY_COLORS[e.name] || '#64748b'} />)}
               </Pie>
               <Tooltip formatter={(val) => [`${val} เหตุการณ์`]} contentStyle={tooltipStyle} />
             </PieChart>
@@ -190,10 +196,10 @@ export default function DataStory({ events }) {
       <Card title="ประเทศที่ได้รับผลกระทบมากที่สุด" sub="นับจากจำนวนเหตุการณ์">
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={stats.topCountries} layout="vertical" margin={{ top: 0, right: 16, left: 70, bottom: 0 }}>
-            <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+            <XAxis type="number" tick={{ fontSize: 11, fill: '#7a8a9e' }} axisLine={false} tickLine={false} />
             <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: '#64748b' }} width={70} axisLine={false} tickLine={false} />
             <Tooltip formatter={(val) => [`${val} เหตุการณ์`]} contentStyle={tooltipStyle} />
-            <Bar dataKey="count" fill="#6366f1" radius={[0, 6, 6, 0]} />
+            <Bar dataKey="count" fill="#f59e0b" radius={[0, 6, 6, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Card>
@@ -201,21 +207,22 @@ export default function DataStory({ events }) {
       {/* Narrative Timeline */}
       <Card title="Narrative Timeline" sub="6 เหตุการณ์ล่าสุดเรียงตามลำดับเวลา">
         <div style={{ position: 'relative', paddingLeft: 22 }}>
-          <div style={{ position: 'absolute', left: 6, top: 0, bottom: 0, width: 1.5, background: '#e2e8f0', borderRadius: 2 }} />
+          <div style={{ position: 'absolute', left: 6, top: 0, bottom: 0, width: 1.5, background: 'rgba(255,255,255,0.08)', borderRadius: 2 }} />
           {stats.narrativeTimeline.map((e, i) => (
             <div key={i} style={{ position: 'relative', marginBottom: i < stats.narrativeTimeline.length - 1 ? 18 : 0 }}>
               <div style={{
                 position: 'absolute', left: -19, top: 4,
                 width: 9, height: 9, borderRadius: '50%',
-                background: SEVERITY_COLORS[e.severity] || '#94a3b8',
-                border: '2px solid white', boxShadow: '0 0 0 1.5px #e2e8f0'
+                background: SEVERITY_COLORS[e.severity] || '#64748b',
+                border: '2px solid #0d1117',
+                boxShadow: `0 0 8px ${SEVERITY_COLORS[e.severity] || '#64748b'}80`
               }} />
-              <div style={{ fontSize: 10, color: '#94a3b8', marginBottom: 2 }}>
+              <div style={{ fontSize: 13, color: '#7a8a9e', marginBottom: 3 }}>
                 {e.date ? new Date(e.date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}
                 {e.city ? ` · ${e.city}` : ''}
               </div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#1e293b', marginBottom: 2 }}>{e.title}</div>
-              <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.6 }}>
+              <div style={{ fontSize: 15, fontWeight: 600, color: '#f1f5f9', marginBottom: 2 }}>{e.title}</div>
+              <div style={{ fontSize: 14, color: '#6e7d91', lineHeight: 1.6 }}>
                 {e.description?.slice(0, 110)}{e.description?.length > 110 ? '…' : ''}
               </div>
             </div>
@@ -232,10 +239,10 @@ export default function DataStory({ events }) {
             { emoji: '🏙️', title: 'มิติของเมืองกับภัยพิบัติ', text: 'ปัญหาระดับเมืองอย่างน้ำท่วมขัง ไฟฟ้าดับ และเส้นทางที่เสียหายจากพายุ ส่งผลกระทบโดยตรงต่อคนในเมืองหลายล้านคน ซึ่งมักไม่ถูกนับในสถิติภัยพิบัติระดับโลก' },
           ].map((p, i) => (
             <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <span style={{ fontSize: 18, flexShrink: 0, marginTop: 1 }}>{p.emoji}</span>
+              <span style={{ fontSize: 22, flexShrink: 0, marginTop: 1 }}>{p.emoji}</span>
               <div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#1e293b', marginBottom: 3 }}>{p.title}</div>
-                <div style={{ fontSize: 12, color: '#475569', lineHeight: 1.75 }}>{p.text}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#f1f5f9', marginBottom: 3 }}>{p.title}</div>
+                <div style={{ fontSize: 15, color: '#94a3b8', lineHeight: 1.8 }}>{p.text}</div>
               </div>
             </div>
           ))}
@@ -243,17 +250,17 @@ export default function DataStory({ events }) {
       </Card>
 
       {/* Sources */}
-      <div style={{ ...glassCard, background: 'rgba(239,246,255,0.7)', borderColor: 'rgba(191,219,254,0.8)' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: '#1e40af', marginBottom: 8 }}>Data Sources & Methodology</div>
+      <div style={{ ...darkCard, borderColor: 'rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.05)' }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#fcd34d', marginBottom: 8 }}>Data Sources & Methodology</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {Object.entries(stats.sourceCount).map(([src, count]) => (
-            <div key={src} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#3730a3' }}>
+            <div key={src} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#94a3b8' }}>
               <span>{src}</span>
-              <span style={{ fontWeight: 500 }}>{count} events</span>
+              <span style={{ fontWeight: 600, color: '#64748b' }}>{count} events</span>
             </div>
           ))}
         </div>
-        <p style={{ margin: '10px 0 0', fontSize: 11, color: '#3730a3', lineHeight: 1.6, opacity: 0.8 }}>
+        <p style={{ margin: '10px 0 0', fontSize: 13, color: '#7a8a9e', lineHeight: 1.6 }}>
           ข้อมูลดึงแบบ real-time · จัดประเภทด้วย Python · แสดงผลด้วย React + Recharts
         </p>
       </div>
@@ -265,17 +272,16 @@ export default function DataStory({ events }) {
 function Card({ title, sub, children }) {
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.6)',
+      background: 'rgba(255,255,255,0.04)',
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
-      border: '1px solid rgba(226,232,240,0.8)',
-      borderRadius: 20,
-      padding: '1.25rem',
-      boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: 20, padding: '1.25rem',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
     }}>
       <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>{title}</div>
-        <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>{sub}</div>
+        <div style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9' }}>{title}</div>
+        <div style={{ fontSize: 14, color: '#7a8a9e', marginTop: 2 }}>{sub}</div>
       </div>
       {children}
     </div>
