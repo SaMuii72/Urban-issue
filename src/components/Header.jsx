@@ -105,6 +105,7 @@ const FilterToggleButton = ({ showFilters, setShowFilters }) => (
     color: showFilters ? '#fcd34d' : '#94a3b8',
     cursor: 'pointer', fontSize: '0.75rem', fontWeight: 500, flexShrink: 0,
     letterSpacing: '0.02em', transition: 'all 0.2s',
+    height: '100%', // เพื่อให้ปุ่มสูงเท่ากับ SearchBar เวลาจัด Flex
   }}>
     {showFilters ? <X size={13} /> : <SlidersHorizontal size={13} />}
     {showFilters ? 'Close' : 'Filter'}
@@ -180,7 +181,7 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
   }, [])
 
   const uniqueCategories = [...new Set(events.map(e => e.category))].filter(Boolean)
-  
+
   // Priority for major disasters to show first
   const disasterPriority = ['earthquake', 'flood', 'fire', 'storm', 'volcano']
   const sortedCategories = uniqueCategories.sort((a, b) => {
@@ -229,42 +230,48 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
             <Nav page={page} setPage={setPage} />
             <SearchBar style={{ flex: 1, maxWidth: 400 }} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
           </div>
-          {/* Row 2: Category */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
-            <span style={filterLabelStyle}>Category</span>
-            <div className="filter-scroll" style={{ display: 'flex', gap: '5px', overflowX: 'auto', scrollbarWidth: 'none', flex: 1, paddingBottom: '1px' }}>
-              {categories.map(cat => (
-                <Btn key={cat.id} isActive={filter === cat.id} color={cat.color} bg={cat.bg} onClick={() => setFilter(cat.id)}>
-                  {cat.icon} {cat.label}
-                </Btn>
-              ))}
-            </div>
-          </div>
-          {/* Row 3: Severity & Date */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', width: '100%' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={filterLabelStyle}>Severity</span>
-              <div style={{ display: 'flex', gap: '5px' }}>
-                {severities.map(sev => (
-                  <Btn key={sev.id} isActive={severityFilter === sev.id} color={sev.color} bg={sev.color ? `${sev.color}22` : null} onClick={() => setSeverityFilter(sev.id)}>
-                    {sev.color && <span style={{ width: 6, height: 6, borderRadius: '50%', background: sev.color, display: 'inline-block', flexShrink: 0, boxShadow: `0 0 6px ${sev.color}` }} />}
-                    {sev.label}
-                  </Btn>
-                ))}
+
+          {/* แสดง Filter เฉพาะหน้า Dashboard (Map) */}
+          {page === 'dashboard' && (
+            <>
+              {/* Row 2: Category */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
+                <span style={filterLabelStyle}>Category</span>
+                <div className="filter-scroll" style={{ display: 'flex', gap: '5px', overflowX: 'auto', scrollbarWidth: 'none', flex: 1, paddingBottom: '1px' }}>
+                  {categories.map(cat => (
+                    <Btn key={cat.id} isActive={filter === cat.id} color={cat.color} bg={cat.bg} onClick={() => setFilter(cat.id)}>
+                      {cat.icon} {cat.label}
+                    </Btn>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.08)' }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={filterLabelStyle}>Period</span>
-              <div style={{ display: 'flex', gap: '5px' }}>
-                {dateRanges.map(range => (
-                  <Btn key={range.id} isActive={dateFilter === range.id} onClick={() => setDateFilter(range.id)}>
-                    {range.label}
-                  </Btn>
-                ))}
+              {/* Row 3: Severity & Date */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={filterLabelStyle}>Severity</span>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    {severities.map(sev => (
+                      <Btn key={sev.id} isActive={severityFilter === sev.id} color={sev.color} bg={sev.color ? `${sev.color}22` : null} onClick={() => setSeverityFilter(sev.id)}>
+                        {sev.color && <span style={{ width: 6, height: 6, borderRadius: '50%', background: sev.color, display: 'inline-block', flexShrink: 0, boxShadow: `0 0 6px ${sev.color}` }} />}
+                        {sev.label}
+                      </Btn>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.08)' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={filterLabelStyle}>Period</span>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    {dateRanges.map(range => (
+                      <Btn key={range.id} isActive={dateFilter === range.id} onClick={() => setDateFilter(range.id)}>
+                        {range.label}
+                      </Btn>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
 
         {/* Right: Stats + controls */}
@@ -298,7 +305,13 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Logo />
           </div>
-          <SearchBar style={{ width: '100%' }} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          {/* Mobile: จัด Search Bar ให้อยู่แถวเดียวกับปุ่ม Filter */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
+            <SearchBar style={{ flex: 1 }} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+            {page === 'dashboard' && (
+              <FilterToggleButton showFilters={showFilters} setShowFilters={setShowFilters} />
+            )}
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', gap: '1.5rem' }}>
             {StatsComponent}
             <UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} isMobile={isMobile} />
@@ -312,20 +325,22 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div style={{ overflowX: 'auto', scrollbarWidth: 'none' }}><Nav page={page} setPage={setPage} /></div>
-              <FilterToggleButton showFilters={showFilters} setShowFilters={setShowFilters} />
+              {page === 'dashboard' && (
+                <FilterToggleButton showFilters={showFilters} setShowFilters={setShowFilters} />
+              )}
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}><UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} isMobile={false} /></div>
           </>
         ) : (
           <>
-            <div style={{ overflowX: 'auto', scrollbarWidth: 'none', maxWidth: 'calc(100% - 100px)' }}><Nav page={page} setPage={setPage} /></div>
-            <FilterToggleButton showFilters={showFilters} setShowFilters={setShowFilters} />
+            {/* Mobile: Nav ขยายเต็มพื้นที่ เพราะปุ่ม Filter ย้ายไปอยู่ด้านบนแล้ว */}
+            <div style={{ overflowX: 'auto', scrollbarWidth: 'none', maxWidth: '100%' }}><Nav page={page} setPage={setPage} /></div>
           </>
         )}
       </div>
 
-      {/* Filter panel */}
-      {showFilters && (
+      {/* Filter panel: แสดงเฉพาะหน้า Map และมีการกด Toggle */}
+      {showFilters && page === 'dashboard' && (
         <div style={{
           display: 'flex', flexDirection: 'column', gap: '0.8rem',
           borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '0.8rem'
