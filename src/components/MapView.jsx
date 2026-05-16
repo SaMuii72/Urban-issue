@@ -7,6 +7,14 @@ import { registerHeatLayer } from '../leaflet-heat-esm'
 // Register the heat plugin onto the ESM Leaflet instance (runs once)
 registerHeatLayer(L)
 
+// ── MAPBOX CONFIGURATION ────────────────────────────────────────
+// ถ้าต้องการใช้ Style ของคุณเอง ให้เอาข้อมูลจากหน้า Mapbox มาใส่ใน 3 ตัวแปรนี้ครับ
+// หากไม่ใส่ หรือเป็นค่าเริ่มต้น ระบบจะใช้แผนที่ดาวเทียมของ Google แทน
+const MAPBOX_USERNAME = 'mapbox'
+const MAPBOX_STYLE_ID = 'satellite-streets-v12'
+const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1Ijoic2FtdWlpNzIiLCJhIjoiY21wODNxOGcyMWJsMDJ0cXo4eTMwZjhodCJ9.c3KO2K7amoAua-T-cTPq7A' // เช่น 'pk.ey...'
+// ────────────────────────────────────────────────────────────────
+
 // ── Risk Zone layer ─────────────────────────────────────────────
 function RiskZoneLayer({ events }) {
   const zones = useMemo(() => {
@@ -153,10 +161,17 @@ export default function MapView({ events, selectedEvent, onMarkerClick }) {
       scrollWheelZoom
       style={{ height: '100%', width: '100%' }}
     >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      {MAPBOX_ACCESS_TOKEN ? (
+        <TileLayer
+          attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
+          url={`https://api.mapbox.com/styles/v1/${MAPBOX_USERNAME}/${MAPBOX_STYLE_ID}/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_ACCESS_TOKEN}`}
+        />
+      ) : (
+        <TileLayer
+          attribution='&copy; <a href="https://www.google.com/maps">Google Maps</a>'
+          url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+        />
+      )}
 
       <RiskZoneLayer events={events} />
       <HeatmapLayer points={events} />
