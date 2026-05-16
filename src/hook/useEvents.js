@@ -7,8 +7,10 @@ export function useEvents(refreshInterval = 5 * 60 * 1000) { // 5 นาที
 
   const fetchEvents = async () => {
     try {
-      // เพิ่ม ?t= เพื่อไม่ให้ browser cache
-      const res = await fetch(`/events.json?t=${Date.now()}`)
+      const url = import.meta.env.VITE_API_URL
+        ? `${import.meta.env.VITE_API_URL}/api/events`
+        : '/api/events'
+      const res = await fetch(url)
       const data = await res.json()
       setEvents(data.events || [])
       setLastUpdated(new Date())

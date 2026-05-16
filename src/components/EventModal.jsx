@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, MapPin, Heart, ShieldCheck, Share2, ArrowUpRight, Zap, AlertTriangle, UserCheck } from 'lucide-react'
+import { X, MapPin, ShieldCheck, Share2, ArrowUpRight, Zap, AlertTriangle } from 'lucide-react'
 import { getCategoryStyles } from './Header'
 
 const EventModal = ({ event, onClose }) => {
@@ -162,33 +162,6 @@ const EventModal = ({ event, onClose }) => {
                 border: '1px solid #f1f5f9'
               }}>
                 {event.description}
-              </p>
-            </motion.div>
-
-            {/* Kind Guidance Section */}
-            <motion.div variants={itemVars} style={{ 
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
-              padding: '1.5rem', 
-              borderRadius: '28px', 
-              marginBottom: '2.5rem',
-              color: 'white',
-              boxShadow: '0 12px 30px rgba(16,185,129,0.25)',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', right: '-10px', top: '-10px', opacity: 0.1 }}>
-                <Heart size={120} color="white" fill="white" />
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                <div style={{ background: 'rgba(255,255,255,0.2)', padding: '0.5rem', borderRadius: '12px' }}>
-                  <Heart size={20} fill="white" />
-                </div>
-                <span style={{ fontWeight: 900, fontSize: '1rem', letterSpacing: '0.02em' }}>Kind UI Guidance</span>
-              </div>
-              
-              <p style={{ fontSize: '0.9rem', opacity: 0.95, lineHeight: 1.5, fontWeight: 500 }}>
-                Human safety and community resilience are our priorities. Please follow verified protocols.
               </p>
             </motion.div>
 
