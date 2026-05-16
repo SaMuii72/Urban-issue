@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { ShieldAlert, Globe, Flame, CloudLightning, Waves, Activity, Zap, MapPin, TreePine, Mountain, Info, SlidersHorizontal, X } from 'lucide-react'
+import { ShieldAlert, Globe, Flame, CloudLightning, Waves, Activity, Zap, MapPin, TreePine, Mountain, Info, SlidersHorizontal, X, LayoutGrid, Radar, Search, Calendar } from 'lucide-react'
 
 export const getCategoryStyles = (category) => {
   const cat = (category || '').toLowerCase()
@@ -22,7 +22,138 @@ export const getCategoryStyles = (category) => {
   return { ...colors[Math.abs(hash) % colors.length], icon: <Info size={14} /> }
 }
 
-const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, setFilter, severityFilter, setSeverityFilter, page, setPage }) => {
+// ── Sub-components (Defined outside to prevent focus loss and unnecessary re-mounting) ──
+const UpdateControls = ({ lastUpdated, onRefresh }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+    <div style={{ fontSize: 11, color: '#7a8a9e', textAlign: 'right', lineHeight: 1.5 }}>
+      <div style={{ letterSpacing: '0.03em', textTransform: 'uppercase', fontSize: 10, color: '#7a8a9e' }}>Last updated</div>
+      <div style={{ fontWeight: 600, color: '#94a3b8', fontVariantNumeric: 'tabular-nums' }}>
+        {lastUpdated
+          ? lastUpdated.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+          : '--:--'}
+      </div>
+    </div>
+    <button
+      onClick={onRefresh}
+      style={{
+        fontSize: 11, padding: '5px 12px', borderRadius: 8,
+        border: '1px solid rgba(255,255,255,0.1)',
+        background: 'rgba(255,255,255,0.05)',
+        color: '#94a3b8', cursor: 'pointer', fontWeight: 600,
+        letterSpacing: '0.02em', transition: 'all 0.2s',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.background = 'rgba(245,158,11,0.12)'
+        e.currentTarget.style.borderColor = 'rgba(245,158,11,0.35)'
+        e.currentTarget.style.color = '#fcd34d'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
+        e.currentTarget.style.color = '#94a3b8'
+      }}
+    >
+      ↻ Refresh
+    </button>
+  </div>
+)
+
+const SearchBar = ({ style, searchQuery, setSearchQuery }) => (
+  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', ...style }}>
+    <Search size={14} color="#64748b" style={{ position: 'absolute', left: '0.85rem' }} />
+    <input
+      type="text"
+      placeholder="Search incidents, cities..."
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      style={{
+        width: '100%', padding: '0.5rem 1rem 0.5rem 2.25rem',
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '12px', color: '#f1f5f9', fontSize: '0.8rem',
+        outline: 'none', transition: 'all 0.2s'
+      }}
+      onFocus={(e) => {
+        e.target.style.borderColor = 'rgba(245,158,11,0.3)'
+        e.target.style.background = 'rgba(255,255,255,0.06)'
+      }}
+      onBlur={(e) => {
+        e.target.style.borderColor = 'rgba(255,255,255,0.08)'
+        e.target.style.background = 'rgba(255,255,255,0.04)'
+      }}
+    />
+  </div>
+)
+
+const FilterToggleButton = ({ showFilters, setShowFilters }) => (
+  <button onClick={() => setShowFilters(v => !v)} style={{
+    display: 'flex', alignItems: 'center', gap: '0.4rem',
+    padding: '0.35rem 0.8rem', borderRadius: '999px',
+    border: '1px solid',
+    borderColor: showFilters ? 'rgba(245,158,11,0.5)' : 'rgba(255,255,255,0.1)',
+    background: showFilters ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.05)',
+    color: showFilters ? '#fcd34d' : '#94a3b8',
+    cursor: 'pointer', fontSize: '0.75rem', fontWeight: 500, flexShrink: 0,
+    letterSpacing: '0.02em', transition: 'all 0.2s',
+  }}>
+    {showFilters ? <X size={13} /> : <SlidersHorizontal size={13} />}
+    {showFilters ? 'Close' : 'Filter'}
+  </button>
+)
+
+const Btn = ({ isActive, color, bg, onClick, children }) => (
+  <button onClick={onClick} style={{
+    display: 'flex', alignItems: 'center', gap: '0.35rem',
+    padding: '0.3rem 0.75rem', borderRadius: '999px', border: '1px solid',
+    borderColor: isActive ? (color || '#f59e0b') : 'rgba(255,255,255,0.09)',
+    background: isActive ? (bg || 'rgba(245,158,11,0.15)') : 'rgba(255,255,255,0.04)',
+    color: isActive ? (color || '#fcd34d') : '#64748b',
+    cursor: 'pointer', fontSize: '0.73rem', fontWeight: isActive ? 600 : 400,
+    transition: 'all 0.15s ease', whiteSpace: 'nowrap', flexShrink: 0,
+    letterSpacing: '0.01em',
+  }}>{children}</button>
+)
+
+const Nav = ({ page, setPage }) => (
+  <div style={{
+    display: 'flex',
+    background: 'rgba(255,255,255,0.05)',
+    borderRadius: '999px', padding: '3px', gap: '2px',
+    flexShrink: 0, border: '1px solid rgba(255,255,255,0.07)'
+  }}>
+    {[{ id: 'dashboard', label: 'Map' }, { id: 'story', label: 'Story' }, { id: 'analytics', label: 'Analytics' }].map(({ id, label }) => (
+      <button key={id} onClick={() => setPage(id)} style={{
+        padding: '0.3rem 0.9rem', borderRadius: '999px', border: 'none',
+        background: page === id ? 'rgba(245,158,11,0.2)' : 'transparent',
+        color: page === id ? '#fcd34d' : '#b4bcc8',
+        cursor: 'pointer', fontSize: '0.85rem',
+        fontWeight: page === id ? 600 : 500,
+        boxShadow: page === id ? '0 0 12px rgba(245,158,11,0.15)' : 'none',
+        transition: 'all 0.2s ease', whiteSpace: 'nowrap',
+        letterSpacing: '0.01em',
+      }}>{label}</button>
+    ))}
+  </div>
+)
+
+const Logo = () => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+    <div style={{
+      background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+      padding: '0.45rem', borderRadius: '12px',
+      boxShadow: '0 4px 16px rgba(245, 158, 11, 0.35)',
+      display: 'flex'
+    }}>
+      <Radar color="#fff" size={18} />
+    </div>
+    <div>
+      <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f1f5f9', lineHeight: 1.1, letterSpacing: '-0.02em' }}>UrbanWatch</h1>
+      <p style={{ fontSize: '0.65rem', color: '#7a8a9e', fontWeight: 500, marginTop: '2px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Monitoring Dashboard</p>
+    </div>
+  </div>
+)
+
+const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, setFilter, severityFilter, setSeverityFilter, searchQuery, setSearchQuery, dateFilter, setDateFilter, page, setPage }) => {
   const [showFilters, setShowFilters] = useState(false)
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024)
   const [isTablet, setIsTablet] = useState(window.innerWidth > 768 && window.innerWidth <= 1024)
@@ -36,61 +167,9 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
     return () => window.removeEventListener('resize', handler)
   }, [])
 
-  // Sub-components
-  const UpdateControls = () => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-      <div style={{ fontSize: 11, color: '#7a8a9e', textAlign: 'right', lineHeight: 1.5 }}>
-        <div style={{ letterSpacing: '0.03em', textTransform: 'uppercase', fontSize: 10, color: '#7a8a9e' }}>Last updated</div>
-        <div style={{ fontWeight: 600, color: '#94a3b8', fontVariantNumeric: 'tabular-nums' }}>
-          {lastUpdated
-            ? lastUpdated.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
-            : '--:--'}
-        </div>
-      </div>
-      <button
-        onClick={onRefresh}
-        style={{
-          fontSize: 11, padding: '5px 12px', borderRadius: 8,
-          border: '1px solid rgba(255,255,255,0.1)',
-          background: 'rgba(255,255,255,0.05)',
-          color: '#94a3b8', cursor: 'pointer', fontWeight: 600,
-          letterSpacing: '0.02em', transition: 'all 0.2s',
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.background = 'rgba(245,158,11,0.12)'
-          e.currentTarget.style.borderColor = 'rgba(245,158,11,0.35)'
-          e.currentTarget.style.color = '#fcd34d'
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
-          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
-          e.currentTarget.style.color = '#94a3b8'
-        }}
-      >
-        ↻ Refresh
-      </button>
-    </div>
-  )
-
-  const FilterToggleButton = () => (
-    <button onClick={() => setShowFilters(v => !v)} style={{
-      display: 'flex', alignItems: 'center', gap: '0.4rem',
-      padding: '0.35rem 0.8rem', borderRadius: '999px',
-      border: '1px solid',
-      borderColor: showFilters ? 'rgba(245,158,11,0.5)' : 'rgba(255,255,255,0.1)',
-      background: showFilters ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.05)',
-      color: showFilters ? '#fcd34d' : '#94a3b8',
-      cursor: 'pointer', fontSize: '0.75rem', fontWeight: 500, flexShrink: 0,
-      letterSpacing: '0.02em', transition: 'all 0.2s',
-    }}>
-      {showFilters ? <X size={13} /> : <SlidersHorizontal size={13} />}
-      {showFilters ? 'Close' : 'Filter'}
-    </button>
-  )
-
   const uniqueCategories = [...new Set(events.map(e => e.category))].filter(Boolean)
   const categories = [
-    { id: 'all', label: 'All', icon: <Globe size={14} />, color: '#f59e0b', bg: 'rgba(245,158,11,0.15)' },
+    { id: 'all', label: 'All', icon: <LayoutGrid size={14} />, color: '#f59e0b', bg: 'rgba(245,158,11,0.15)' },
     ...uniqueCategories.map(cat => ({ id: cat, label: cat.charAt(0).toUpperCase() + cat.slice(1), ...getCategoryStyles(cat) }))
   ]
   const severities = [
@@ -99,58 +178,12 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
     { id: 'medium', label: 'Medium', color: '#f59e0b' },
     { id: 'low', label: 'Low', color: '#10b981' },
   ]
-
-  const Btn = ({ isActive, color, bg, onClick, children }) => (
-    <button onClick={onClick} style={{
-      display: 'flex', alignItems: 'center', gap: '0.35rem',
-      padding: '0.3rem 0.75rem', borderRadius: '999px', border: '1px solid',
-      borderColor: isActive ? (color || '#f59e0b') : 'rgba(255,255,255,0.09)',
-      background: isActive ? (bg || 'rgba(245,158,11,0.15)') : 'rgba(255,255,255,0.04)',
-      color: isActive ? (color || '#fcd34d') : '#64748b',
-      cursor: 'pointer', fontSize: '0.73rem', fontWeight: isActive ? 600 : 400,
-      transition: 'all 0.15s ease', whiteSpace: 'nowrap', flexShrink: 0,
-      letterSpacing: '0.01em',
-    }}>{children}</button>
-  )
-
-  const Nav = () => (
-    <div style={{
-      display: 'flex',
-      background: 'rgba(255,255,255,0.05)',
-      borderRadius: '999px', padding: '3px', gap: '2px',
-      flexShrink: 0, border: '1px solid rgba(255,255,255,0.07)'
-    }}>
-      {[{ id: 'dashboard', label: 'Map' }, { id: 'story', label: 'Story' }, { id: 'analytics', label: 'Analytics' }].map(({ id, label }) => (
-        <button key={id} onClick={() => setPage(id)} style={{
-          padding: '0.3rem 0.9rem', borderRadius: '999px', border: 'none',
-          background: page === id ? 'rgba(245,158,11,0.2)' : 'transparent',
-          color: page === id ? '#fcd34d' : '#b4bcc8',
-          cursor: 'pointer', fontSize: '0.85rem',
-          fontWeight: page === id ? 600 : 500,
-          boxShadow: page === id ? '0 0 12px rgba(245,158,11,0.15)' : 'none',
-          transition: 'all 0.2s ease', whiteSpace: 'nowrap',
-          letterSpacing: '0.01em',
-        }}>{label}</button>
-      ))}
-    </div>
-  )
-
-  const Logo = () => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
-      <div style={{
-        background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
-        padding: '0.45rem', borderRadius: '12px',
-        boxShadow: '0 4px 16px rgba(245, 158, 11, 0.35)',
-        display: 'flex'
-      }}>
-        <ShieldAlert color="#fff" size={18} />
-      </div>
-      <div>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f1f5f9', lineHeight: 1.1, letterSpacing: '-0.02em' }}>UrbanWatch</h1>
-        <p style={{ fontSize: '0.65rem', color: '#7a8a9e', fontWeight: 500, marginTop: '2px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Monitoring Dashboard</p>
-      </div>
-    </div>
-  )
+  const dateRanges = [
+    { id: 'all', label: 'All Time' },
+    { id: 'today', label: 'Today' },
+    { id: '3days', label: '3 Days' },
+    { id: 'week', label: 'Week' },
+  ]
 
   const filterLabelStyle = {
     fontSize: '0.75rem', fontWeight: 700, color: '#7a8a9e',
@@ -166,10 +199,11 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
       }}>
         {/* Left: Logo/Nav + filters stacked */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', flex: 1, minWidth: 0 }}>
-          {/* Row 1 */}
+          {/* Row 1: Logo + Nav + Search */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
             <Logo />
-            <Nav />
+            <Nav page={page} setPage={setPage} />
+            <SearchBar style={{ flex: 1, maxWidth: 400 }} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
           </div>
           {/* Row 2: Category */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
@@ -182,16 +216,29 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
               ))}
             </div>
           </div>
-          {/* Row 3: Severity */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
-            <span style={filterLabelStyle}>Severity</span>
-            <div className="filter-scroll" style={{ display: 'flex', gap: '5px', overflowX: 'auto', scrollbarWidth: 'none', flex: 1, paddingBottom: '1px' }}>
-              {severities.map(sev => (
-                <Btn key={sev.id} isActive={severityFilter === sev.id} color={sev.color} bg={sev.color ? `${sev.color}22` : null} onClick={() => setSeverityFilter(sev.id)}>
-                  {sev.color && <span style={{ width: 6, height: 6, borderRadius: '50%', background: sev.color, display: 'inline-block', flexShrink: 0, boxShadow: `0 0 6px ${sev.color}` }} />}
-                  {sev.label}
-                </Btn>
-              ))}
+          {/* Row 3: Severity & Date */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={filterLabelStyle}>Severity</span>
+              <div style={{ display: 'flex', gap: '5px' }}>
+                {severities.map(sev => (
+                  <Btn key={sev.id} isActive={severityFilter === sev.id} color={sev.color} bg={sev.color ? `${sev.color}22` : null} onClick={() => setSeverityFilter(sev.id)}>
+                    {sev.color && <span style={{ width: 6, height: 6, borderRadius: '50%', background: sev.color, display: 'inline-block', flexShrink: 0, boxShadow: `0 0 6px ${sev.color}` }} />}
+                    {sev.label}
+                  </Btn>
+                ))}
+              </div>
+            </div>
+            <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.08)' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={filterLabelStyle}>Period</span>
+              <div style={{ display: 'flex', gap: '5px' }}>
+                {dateRanges.map(range => (
+                  <Btn key={range.id} isActive={dateFilter === range.id} onClick={() => setDateFilter(range.id)}>
+                    {range.label}
+                  </Btn>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -203,7 +250,7 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
           borderLeft: '1px solid rgba(255,255,255,0.06)', paddingLeft: '1.5rem'
         }}>
           {StatsComponent}
-          <UpdateControls />
+          <UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} />
         </div>
       </header>
     )
@@ -219,14 +266,18 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
       {isTablet ? (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
           <Logo />
+          <SearchBar style={{ flex: 1, maxWidth: 300 }} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>{StatsComponent}</div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <Logo />
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Logo />
+            <UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} />
+          </div>
+          <SearchBar style={{ width: '100%' }} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
             {StatsComponent}
-            <UpdateControls />
           </div>
         </div>
       )}
@@ -236,15 +287,15 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
         {isTablet ? (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{ overflowX: 'auto', scrollbarWidth: 'none' }}><Nav /></div>
-              <FilterToggleButton />
+              <div style={{ overflowX: 'auto', scrollbarWidth: 'none' }}><Nav page={page} setPage={setPage} /></div>
+              <FilterToggleButton showFilters={showFilters} setShowFilters={setShowFilters} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}><UpdateControls /></div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}><UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} /></div>
           </>
         ) : (
           <>
-            <div style={{ overflowX: 'auto', scrollbarWidth: 'none', maxWidth: 'calc(100% - 100px)' }}><Nav /></div>
-            <FilterToggleButton />
+            <div style={{ overflowX: 'auto', scrollbarWidth: 'none', maxWidth: 'calc(100% - 100px)' }}><Nav page={page} setPage={setPage} /></div>
+            <FilterToggleButton showFilters={showFilters} setShowFilters={setShowFilters} />
           </>
         )}
       </div>
@@ -252,8 +303,8 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
       {/* Filter panel */}
       {showFilters && (
         <div style={{
-          display: 'flex', flexDirection: 'column', gap: '0.6rem',
-          borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '0.7rem'
+          display: 'flex', flexDirection: 'column', gap: '0.8rem',
+          borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '0.8rem'
         }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
             <span style={{ ...filterLabelStyle, minWidth: 60, paddingTop: '0.25rem' }}>Category</span>
@@ -272,6 +323,16 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
                 <Btn key={sev.id} isActive={severityFilter === sev.id} color={sev.color} bg={sev.color ? `${sev.color}22` : null} onClick={() => setSeverityFilter(sev.id)}>
                   {sev.color && <span style={{ width: 6, height: 6, borderRadius: '50%', background: sev.color, display: 'inline-block', boxShadow: `0 0 6px ${sev.color}` }} />}
                   {sev.label}
+                </Btn>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ ...filterLabelStyle, minWidth: 60 }}>Period</span>
+            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', flex: 1 }}>
+              {dateRanges.map(range => (
+                <Btn key={range.id} isActive={dateFilter === range.id} onClick={() => setDateFilter(range.id)}>
+                  {range.label}
                 </Btn>
               ))}
             </div>

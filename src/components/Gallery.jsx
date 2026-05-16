@@ -19,8 +19,8 @@ const Gallery = ({ events, selectedId, onSelect }) => {
   if (!sortedEvents.length) return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem 1rem', gap: 12 }}>
       <span style={{ fontSize: 36 }}>🔍</span>
-      <p style={{ fontSize: 13, fontWeight: 600, color: '#7a8a9e', margin: 0 }}>ไม่พบเหตุการณ์</p>
-      <p style={{ fontSize: 12, margin: 0, color: '#7a8a9e' }}>ลองเปลี่ยน filter ดูครับ</p>
+      <p style={{ fontSize: 13, fontWeight: 600, color: '#7a8a9e', margin: 0 }}>ไม่พบข้อมูลเหตุการณ์</p>
+      <p style={{ fontSize: 12, margin: 0, color: '#7a8a9e' }}>กรุณาปรับเปลี่ยนตัวกรองหรือการค้นหา</p>
     </div>
   )
 

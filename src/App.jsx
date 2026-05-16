@@ -13,6 +13,8 @@ function App() {
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [filter, setFilter] = useState('all')
   const [severityFilter, setSeverityFilter] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [dateFilter, setDateFilter] = useState('all')
   const [isGalleryOpen, setIsGalleryOpen] = useState(true)
   const [page, setPage] = useState('dashboard')
 
@@ -23,9 +25,30 @@ function App() {
 }, [])
 
   const filteredEvents = events.filter(e => {
+    // Category & Severity
     const categoryMatch = filter === 'all' || e.category === filter
     const severityMatch = severityFilter === 'all' || e.severity === severityFilter
-    return categoryMatch && severityMatch
+
+    // Search (Title, City, Country)
+    const searchLower = searchQuery.toLowerCase()
+    const searchMatch = !searchQuery ||
+      (e.title || '').toLowerCase().includes(searchLower) ||
+      (e.city || '').toLowerCase().includes(searchLower) ||
+      (e.country || '').toLowerCase().includes(searchLower)
+
+    // Date Filter
+    let dateMatch = true
+    if (dateFilter !== 'all' && e.date) {
+      const eventDate = new Date(e.date)
+      const now = new Date()
+      const diffDays = (now - eventDate) / (1000 * 60 * 60 * 24)
+
+      if (dateFilter === 'today') dateMatch = diffDays <= 1
+      else if (dateFilter === '3days') dateMatch = diffDays <= 3
+      else if (dateFilter === 'week') dateMatch = diffDays <= 7
+    }
+
+    return categoryMatch && severityMatch && searchMatch && dateMatch
   })
 
   const handleSelectEvent = (event) => {
@@ -72,7 +95,10 @@ function App() {
         setFilter={setFilter}
         severityFilter={severityFilter}
         setSeverityFilter={setSeverityFilter}
-        // เพิ่ม page navigation ใน Header
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        dateFilter={dateFilter}
+        setDateFilter={setDateFilter}
         page={page}
         setPage={setPage}
       />
