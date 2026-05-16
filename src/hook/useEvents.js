@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 
-export function useEvents(refreshInterval = 5 * 60 * 1000) { // 5 นาที
+export function useEvents(refreshInterval = 5 * 60 * 1000) {
   const [events, setEvents] = useState([])
   const [lastUpdated, setLastUpdated] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   const fetchEvents = async () => {
     try {
@@ -11,11 +12,13 @@ export function useEvents(refreshInterval = 5 * 60 * 1000) { // 5 นาที
         ? `${import.meta.env.VITE_API_URL}/api/events`
         : '/api/events'
       const res = await fetch(url)
+      if (!res.ok) throw new Error(`Server error: ${res.status}`)
       const data = await res.json()
       setEvents(data.events || [])
       setLastUpdated(new Date())
+      setError(null)
     } catch (e) {
-      console.error('Failed to fetch events:', e)
+      setError(e.message || 'Failed to fetch events')
     } finally {
       setLoading(false)
     }
@@ -27,5 +30,5 @@ export function useEvents(refreshInterval = 5 * 60 * 1000) { // 5 นาที
     return () => clearInterval(interval)
   }, [refreshInterval])
 
-  return { events, lastUpdated, loading, refresh: fetchEvents }
+  return { events, lastUpdated, loading, error, refresh: fetchEvents }
 }

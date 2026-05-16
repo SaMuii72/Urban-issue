@@ -1,4 +1,5 @@
-import { ShieldAlert, Globe, Flame, CloudLightning, Waves, Activity, Zap, MapPin, TreePine, Mountain, Info } from 'lucide-react'
+import React from 'react'
+import { ShieldAlert, Globe, Flame, CloudLightning, Waves, Activity, Zap, MapPin, TreePine, Mountain, Info, SlidersHorizontal } from 'lucide-react'
 
 // Helper to get color/icon for category dynamically
 export const getCategoryStyles = (category) => {
@@ -26,8 +27,9 @@ export const getCategoryStyles = (category) => {
   return { ...colors[idx], icon: <Info size={14} /> }
 }
 
-const Header = ({ events = [], stats, filter, setFilter, severityFilter, setSeverityFilter, page, setPage }) => {  // Dynamically extract unique categories from events
+const Header = ({ events = [], stats, filter, setFilter, severityFilter, setSeverityFilter, page, setPage }) => {
   const uniqueCategories = [...new Set(events.map(e => e.category))].filter(Boolean)
+  const [showFilters, setShowFilters] = React.useState(false)
 
   const categories = [
     { id: 'all', label: 'All', icon: <Globe size={14} /> },
@@ -104,8 +106,24 @@ const Header = ({ events = [], stats, filter, setFilter, severityFilter, setSeve
         </div>
       </div>
 
-      {/* Filters row */}
-      <div className="header-filters-row" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
+      {/* Filters row — hidden on mobile unless toggled */}
+      <div className={`header-filters-row${showFilters ? ' open' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
+
+        {/* Mobile filter toggle */}
+        <button
+          className="filter-toggle-btn"
+          onClick={() => setShowFilters(v => !v)}
+          style={{
+            display: 'none',
+            alignItems: 'center', gap: '0.4rem',
+            padding: '0.35rem 0.75rem', borderRadius: '999px',
+            border: '1px solid #e2e8f0', background: showFilters ? '#e0f2fe' : 'white',
+            color: showFilters ? '#0ea5e9' : '#475569',
+            cursor: 'pointer', fontSize: '0.75rem', fontWeight: 500,
+          }}
+        >
+          <SlidersHorizontal size={13} /> Filters
+        </button>
 
         {/* Category filters */}
         <div className="header-filter-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>

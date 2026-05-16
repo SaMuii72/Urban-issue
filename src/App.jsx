@@ -10,7 +10,7 @@ import DataStory from './components/DataStory'  // เพิ่มบรรท�
 import { useEvents } from './hook/useEvents'
 import Analytics from './components/Analytics'
 function App() {
-  const { events, lastUpdated, loading, refresh } = useEvents()
+  const { events, lastUpdated, loading, error, refresh } = useEvents()
 const [selectedEvent, setSelectedEvent] = useState(null)
   const [filter, setFilter] = useState('all')
   const [severityFilter, setSeverityFilter] = useState('all')
@@ -35,6 +35,25 @@ const [selectedEvent, setSelectedEvent] = useState(null)
     setIsModalOpen(true)
     if (window.innerWidth <= 768) setIsGalleryOpen(false)
   }
+
+  if (loading) return (
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, background: 'var(--bg-color)' }}>
+      <div style={{ width: 40, height: 40, border: '3px solid #e2e8f0', borderTop: '3px solid #0ea5e9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <p style={{ fontSize: 14, color: '#64748b' }}>กำลังโหลดข้อมูล...</p>
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+    </div>
+  )
+
+  if (error) return (
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, background: 'var(--bg-color)' }}>
+      <div style={{ fontSize: 40 }}>⚠️</div>
+      <p style={{ fontSize: 16, fontWeight: 600, color: '#0f172a' }}>ไม่สามารถเชื่อมต่อ server ได้</p>
+      <p style={{ fontSize: 13, color: '#94a3b8' }}>{error}</p>
+      <button onClick={refresh} style={{ padding: '8px 20px', borderRadius: 10, border: 'none', background: '#0ea5e9', color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: 13 }}>
+        ลองใหม่
+      </button>
+    </div>
+  )
 
   return (
     <div style={{
