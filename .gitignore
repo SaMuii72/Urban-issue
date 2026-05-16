@@ -5,6 +5,5 @@ dist/
 .env
 events.json
 
-
-# vs code extensions
+# vscode extensions
 .history/
