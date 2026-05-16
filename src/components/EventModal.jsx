@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, MapPin, Share2, ArrowUpRight, AlertTriangle } from 'lucide-react'
+import { X, MapPin, Share2, ArrowUpRight, AlertTriangle, Calendar, Database, Navigation } from 'lucide-react'
 import { getCategoryStyles } from './Header'
 
 const EventModal = ({ event, onClose }) => {
@@ -113,21 +113,48 @@ const EventModal = ({ event, onClose }) => {
               display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
               gap: '0.75rem', marginBottom: '1.75rem'
             }}>
+              {/* Severity */}
               <div style={{
                 padding: '1rem', borderRadius: '16px',
                 background: isHigh ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
                 border: `1px solid ${isHigh ? 'rgba(239,68,68,0.25)' : 'rgba(245,158,11,0.25)'}`
               }}>
-                <div style={{ fontSize: '0.6rem', color: isHigh ? '#fca5a5' : '#fcd34d', fontWeight: 800, textTransform: 'uppercase', marginBottom: '5px', letterSpacing: '0.05em' }}>Level</div>
+                <div style={{ fontSize: '0.6rem', color: isHigh ? '#fca5a5' : '#fcd34d', fontWeight: 800, textTransform: 'uppercase', marginBottom: '5px', letterSpacing: '0.05em' }}>Severity</div>
                 <div style={{ fontSize: '1rem', fontWeight: 800, color: isHigh ? '#fca5a5' : '#fcd34d' }}>{event.severity?.toUpperCase() || 'MEDIUM'}</div>
               </div>
+              {/* Location */}
               <div style={{
                 padding: '1rem', background: 'rgba(255,255,255,0.04)',
                 borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', gridColumn: 'span 2'
               }}>
-                <div style={{ fontSize: '0.6rem', color: '#7a8a9e', fontWeight: 800, textTransform: 'uppercase', marginBottom: '5px', letterSpacing: '0.05em' }}>Location Context</div>
+                <div style={{ fontSize: '0.6rem', color: '#7a8a9e', fontWeight: 800, textTransform: 'uppercase', marginBottom: '5px', letterSpacing: '0.05em' }}>Location</div>
                 <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <MapPin size={13} color="#f59e0b" /> {event.city || 'Global Origin'}
+                  <MapPin size={13} color="#f59e0b" />
+                  {[event.city, event.country].filter(Boolean).join(', ') || 'Global Origin'}
+                </div>
+              </div>
+              {/* Date */}
+              <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.04)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontSize: '0.6rem', color: '#7a8a9e', fontWeight: 800, textTransform: 'uppercase', marginBottom: '5px', letterSpacing: '0.05em' }}>Date</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <Calendar size={12} color="#64748b" />
+                  {event.date ? new Date(event.date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                </div>
+              </div>
+              {/* Source */}
+              <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.04)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontSize: '0.6rem', color: '#7a8a9e', fontWeight: 800, textTransform: 'uppercase', marginBottom: '5px', letterSpacing: '0.05em' }}>Source</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <Database size={12} color="#64748b" />
+                  {event.source || 'Unknown'}
+                </div>
+              </div>
+              {/* Coordinates */}
+              <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.04)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontSize: '0.6rem', color: '#7a8a9e', fontWeight: 800, textTransform: 'uppercase', marginBottom: '5px', letterSpacing: '0.05em' }}>Coords</div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <Navigation size={12} color="#64748b" />
+                  {event.lat != null ? `${event.lat.toFixed(2)}, ${event.lng.toFixed(2)}` : 'N/A'}
                 </div>
               </div>
             </motion.div>
