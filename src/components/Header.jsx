@@ -23,11 +23,18 @@ export const getCategoryStyles = (category) => {
 }
 
 // ── Sub-components (Defined outside to prevent focus loss and unnecessary re-mounting) ──
-const UpdateControls = ({ lastUpdated, onRefresh }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-    <div style={{ fontSize: 11, color: '#7a8a9e', textAlign: 'right', lineHeight: 1.5 }}>
-      <div style={{ letterSpacing: '0.03em', textTransform: 'uppercase', fontSize: 10, color: '#7a8a9e' }}>Last updated</div>
-      <div style={{ fontWeight: 600, color: '#94a3b8', fontVariantNumeric: 'tabular-nums' }}>
+const UpdateControls = ({ lastUpdated, onRefresh, isMobile }) => (
+  <div style={{
+    display: 'flex',
+    flexDirection: isMobile ? 'column' : 'row',
+    alignItems: isMobile ? 'center' : 'center',
+    gap: isMobile ? '0.35rem' : '0.75rem',
+    width: isMobile ? 'auto' : 'auto',
+    justifyContent: isMobile ? 'center' : 'flex-end'
+  }}>
+    <div style={{ fontSize: 10, color: '#7a8a9e', textAlign: isMobile ? 'center' : 'right', lineHeight: 1.2 }}>
+      <div style={{ letterSpacing: '0.03em', textTransform: 'uppercase', fontSize: 9, color: '#7a8a9e', marginBottom: '2px' }}>Last updated</div>
+      <div style={{ fontWeight: 600, color: '#94a3b8', fontVariantNumeric: 'tabular-nums', fontSize: 11 }}>
         {lastUpdated
           ? lastUpdated.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
           : '--:--'}
@@ -36,7 +43,7 @@ const UpdateControls = ({ lastUpdated, onRefresh }) => (
     <button
       onClick={onRefresh}
       style={{
-        fontSize: 11, padding: '5px 12px', borderRadius: 8,
+        fontSize: 10, padding: '3px 10px', borderRadius: 6,
         border: '1px solid rgba(255,255,255,0.1)',
         background: 'rgba(255,255,255,0.05)',
         color: '#94a3b8', cursor: 'pointer', fontWeight: 600,
@@ -157,11 +164,13 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
   const [showFilters, setShowFilters] = useState(false)
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024)
   const [isTablet, setIsTablet] = useState(window.innerWidth > 768 && window.innerWidth <= 1024)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 480)
 
   useEffect(() => {
     const handler = () => {
       setIsDesktop(window.innerWidth > 1024)
       setIsTablet(window.innerWidth > 768 && window.innerWidth <= 1024)
+      setIsMobile(window.innerWidth <= 480)
     }
     window.addEventListener('resize', handler)
     return () => window.removeEventListener('resize', handler)
@@ -250,7 +259,7 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
           borderLeft: '1px solid rgba(255,255,255,0.06)', paddingLeft: '1.5rem'
         }}>
           {StatsComponent}
-          <UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} />
+          <UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} isMobile={false} />
         </div>
       </header>
     )
@@ -273,24 +282,24 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Logo />
-            <UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} />
           </div>
           <SearchBar style={{ width: '100%' }} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-          <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', gap: '1.5rem' }}>
             {StatsComponent}
+            <UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} isMobile={isMobile} />
           </div>
         </div>
       )}
 
       {/* Row 2: Nav + Filter (+ UpdateControls on tablet) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
         {isTablet ? (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div style={{ overflowX: 'auto', scrollbarWidth: 'none' }}><Nav page={page} setPage={setPage} /></div>
               <FilterToggleButton showFilters={showFilters} setShowFilters={setShowFilters} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}><UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} /></div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}><UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} isMobile={false} /></div>
           </>
         ) : (
           <>
