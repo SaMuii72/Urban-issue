@@ -4,3 +4,6 @@ dist/
 *.local
 .env
 events.json
+
+# vscode extensions
+.history/

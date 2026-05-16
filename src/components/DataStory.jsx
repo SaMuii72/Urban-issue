@@ -1,8 +1,18 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts'
+
+function useIsMobile() {
+  const [mobile, setMobile] = useState(window.innerWidth < 640)
+  useEffect(() => {
+    const h = () => setMobile(window.innerWidth < 640)
+    window.addEventListener('resize', h)
+    return () => window.removeEventListener('resize', h)
+  }, [])
+  return mobile
+}
 
 const COLORS = {
   fire: '#ef4444', earthquake: '#8b5cf6', storm: '#60a5fa',
@@ -40,6 +50,7 @@ const tooltipStyle = {
 }
 
 export default function DataStory({ events }) {
+  const isMobile = useIsMobile()
   const stats = useMemo(() => {
     if (!events.length) return null
 
@@ -124,7 +135,7 @@ export default function DataStory({ events }) {
       </div>
 
       {/* Key Insights */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '1rem' }}>
         {[
           { number: `${stats.developingPct}%`, label: 'เกิดในประเทศกำลังพัฒนา', sub: `จาก ${stats.withCountryCount} เหตุการณ์`, color: '#60a5fa' },
           { number: `${stats.seriousPct}%`, label: 'ระดับ High / Critical', sub: 'ต้องการการตอบสนองเร่งด่วน', color: '#ef4444' },
@@ -163,7 +174,7 @@ export default function DataStory({ events }) {
       )}
 
       {/* Charts */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
         <Card title="ประเภทภัยพิบัติ" sub="จำนวนแยกตามประเภท">
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={stats.categoryData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>

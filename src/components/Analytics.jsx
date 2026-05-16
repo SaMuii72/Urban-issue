@@ -1,8 +1,18 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, CartesianGrid, PieChart, Pie, Cell
 } from 'recharts'
+
+function useIsMobile() {
+  const [mobile, setMobile] = useState(window.innerWidth < 640)
+  useEffect(() => {
+    const h = () => setMobile(window.innerWidth < 640)
+    window.addEventListener('resize', h)
+    return () => window.removeEventListener('resize', h)
+  }, [])
+  return mobile
+}
 
 const COLORS = {
   fire: '#ef4444', earthquake: '#8b5cf6', storm: '#60a5fa',
@@ -28,6 +38,7 @@ const tooltipStyle = {
 }
 
 export default function Analytics({ events }) {
+  const isMobile = useIsMobile()
   const stats = useMemo(() => {
     if (!events.length) return null
 
@@ -133,7 +144,7 @@ export default function Analytics({ events }) {
       </Card>
 
       {/* Category + Severity */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
         <Card title="ประเภทภัยพิบัติ" sub="จำนวนแยกตาม category">
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={stats.categoryData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
@@ -175,7 +186,7 @@ export default function Analytics({ events }) {
       </Card>
 
       {/* Temporal */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
         <Card title="รายเดือน" sub="12 เดือนล่าสุด">
           <ResponsiveContainer width="100%" height={160}>
             <BarChart data={stats.monthlyPattern} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
