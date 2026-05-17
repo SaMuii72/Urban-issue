@@ -20,7 +20,6 @@ app.add_middleware(
 
 # In-memory cache
 _cache = {"events": [], "fetched_at": None}
-
 _hist_cache = {"events": [], "fetched_at": None}
 
 
@@ -50,7 +49,10 @@ def startup():
 
 
 @app.get("/api/events")
-def get_events():
+def get_events(refresh: bool = False):
+    if refresh:
+        logger.info("🔄 Forced refresh requested for main events...")
+        fetch_all()
     return {
         "events": _cache["events"],
         "total": len(_cache["events"]),
@@ -59,16 +61,16 @@ def get_events():
 
 
 @app.get("/api/chronicles")
-def get_historical_events():
-    if not _hist_cache["events"]:
-        logger.info("Generating crisis chronicles via Gemini...")
+def get_historical_events(refresh: bool = False):
+    if refresh or not _hist_cache.get("events"):
+        logger.info("🔄 Forced refresh requested for historical stories (NASA + AI)...")
         events = chronicles.fetch_and_generate_stories()
         _hist_cache["events"] = events
         _hist_cache["fetched_at"] = datetime.utcnow().isoformat() + "Z"
         
     return {
-        "events": _hist_cache["events"],
-        "fetched_at": _hist_cache["fetched_at"]
+        "events": _hist_cache.get("events", []),
+        "fetched_at": _hist_cache.get("fetched_at")
     }
 
 

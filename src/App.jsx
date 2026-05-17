@@ -144,7 +144,7 @@ function App() {
       ) : page === 'chronicle' ? (
         // 🌟 เพิ่มเงื่อนไขนี้ เพื่อแสดงหน้า Historical Narrative เมื่อกดแท็บ History
         <div className="page-content" style={{ flex: 1, overflowY: 'auto' }}>
-          <Chronicle />
+          <Chronicle lastUpdated={lastUpdated} />
         </div>
       ) : (
         <div className="glass page-content" style={{ flex: 1, overflowY: 'auto', borderRadius: '20px' }}>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 export function useEvents(refreshInterval = 5 * 60 * 1000) {
   const [events, setEvents] = useState([])
@@ -6,14 +6,22 @@ export function useEvents(refreshInterval = 5 * 60 * 1000) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const fetchEvents = async () => {
+  // ใช้ useCallback เพื่อจำฟังก์ชันไว้ และรับค่า isManualRefresh
+  const fetchEvents = useCallback(async (isManualRefresh = false) => {
     try {
-      const url = import.meta.env.VITE_API_URL
+      if (isManualRefresh) setLoading(true) // โชว์หน้าโหลดตอนกด Refresh
+
+      const baseUrl = import.meta.env.VITE_API_URL
         ? `${import.meta.env.VITE_API_URL}/api/events`
         : '/api/events'
+
+      // ถ้าเป็นการกดปุ่มด้วยมือ ให้ต่อท้าย ?refresh=true
+      const url = isManualRefresh ? `${baseUrl}?refresh=true` : baseUrl
+
       const res = await fetch(url)
       if (!res.ok) throw new Error(`Server error: ${res.status}`)
       const data = await res.json()
+
       setEvents(data.events || [])
       setLastUpdated(new Date())
       setError(null)
@@ -22,13 +30,16 @@ export function useEvents(refreshInterval = 5 * 60 * 1000) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchEvents()
-    const interval = setInterval(fetchEvents, refreshInterval)
+    fetchEvents() // ทำงานครั้งแรก (ไม่บังคับ refresh)
+    const interval = setInterval(() => fetchEvents(false), refreshInterval)
     return () => clearInterval(interval)
-  }, [refreshInterval])
+  }, [fetchEvents, refreshInterval])
 
-  return { events, lastUpdated, loading, error, refresh: fetchEvents }
+  // ฟังก์ชันนี้จะถูกส่งไปให้ปุ่มบน Header
+  const manualRefresh = () => fetchEvents(true)
+
+  return { events, lastUpdated, loading, error, refresh: manualRefresh }
 }

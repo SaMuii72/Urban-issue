@@ -1,5 +1,5 @@
 // src/components/Chronicle.jsx
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MapContainer, TileLayer, Marker, useMap, Circle } from 'react-leaflet'
 import { History, Clock, MapPin, Loader2, AlertTriangle, Sparkles, ChevronLeft, Menu, X } from 'lucide-react'
@@ -15,7 +15,7 @@ function MapController({ coords, zoom }) {
   return null
 }
 
-const Chronicle = () => {
+const Chronicle = ({ lastUpdated }) => {
   const [events, setEvents] = useState([])
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [currentStep, setCurrentStep] = useState(0)
@@ -23,27 +23,39 @@ const Chronicle = () => {
   const [error, setError] = useState(null)
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-  // ✨ เพิ่ม State สำหรับเช็คว่าเป็นจอ Mobile หรือไม่
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
+  const isInitialMount = useRef(true)
+
+  // Effect สำหรับจัดการขนาดหน้าจอ (ทำแค่ครั้งเดียวตอนโหลด)
   useEffect(() => {
-    // ฟังก์ชันจัดการตอนย่อ/ขยายจอ
     const handleResize = () => {
       const mobile = window.innerWidth <= 768
       setIsMobile(mobile)
       if (mobile) setIsSidebarOpen(false)
     }
-
-    handleResize() // เรียกตอนเริ่มโหลด
+    handleResize()
     window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
+  // Effect สำหรับดึงข้อมูล (ทำใหม่ทุกครั้งที่ lastUpdated เปลี่ยน)
+  useEffect(() => {
     const fetchHistory = async () => {
       try {
         setLoading(true)
         setError(null)
-        const url = import.meta.env.VITE_API_URL
+
+        // เช็คว่าเป็น Refresh หรือครั้งแรก
+        const isRefresh = !isInitialMount.current
+        isInitialMount.current = false // ปิดธงครั้งแรกทิ้ง
+
+        const baseUrl = import.meta.env.VITE_API_URL
           ? `${import.meta.env.VITE_API_URL}/api/chronicles`
           : 'http://localhost:8000/api/chronicles'
+
+        // ถ้าไม่ใช่เปิดหน้าครั้งแรก ให้ส่ง ?refresh=true ไปที่ Backend
+        const url = isRefresh ? `${baseUrl}?refresh=true` : baseUrl
 
         const res = await fetch(url)
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
@@ -52,6 +64,7 @@ const Chronicle = () => {
         if (data.events && data.events.length > 0) {
           setEvents(data.events)
           setSelectedEvent(data.events[0])
+          setCurrentStep(0)
         } else {
           setError("ไม่พบข้อมูลภัยพิบัติที่ตรงตามเงื่อนไขในขณะนี้")
         }
@@ -62,10 +75,10 @@ const Chronicle = () => {
         setLoading(false)
       }
     }
-    fetchHistory()
 
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+    // ทำงานทุกครั้งที่ lastUpdated (จากการกดปุ่มบน Header) เปลี่ยนไป
+    fetchHistory()
+  }, [lastUpdated])
 
   const handleSelectEvent = (event) => {
     setSelectedEvent(event)
@@ -94,7 +107,7 @@ const Chronicle = () => {
 
   const activeStep = selectedEvent.steps[currentStep]
 
-  // ✨ ดึงกล่อง Narrative แยกออกมาเป็นฟังก์ชัน เพื่อให้สลับที่วางได้ง่ายๆ
+  // ดึงกล่อง Narrative แยกออกมาเป็นฟังก์ชัน เพื่อให้สลับที่วางได้ง่ายๆ
   const renderNarrative = (isOverlay = true) => (
     <AnimatePresence mode="wait">
       <motion.div
@@ -235,7 +248,7 @@ const Chronicle = () => {
             />
           </MapContainer>
 
-          {/* ✨ Desktop: แสดงกล่องข้อความทับลงไปบนแผนที่ตามปกติ */}
+          {/* Desktop: แสดงกล่องข้อความทับลงไปบนแผนที่ตามปกติ */}
           {!isMobile && renderNarrative(true)}
         </div>
 
@@ -266,7 +279,7 @@ const Chronicle = () => {
           </div>
         </div>
 
-        {/* ✨ Mobile: เอากล่องเนื้อเรื่องมาวางเรียงต่อจาก Timeline แทน */}
+        {/* Mobile: เอากล่องเนื้อเรื่องมาวางเรียงต่อจาก Timeline แทน */}
         {isMobile && renderNarrative(false)}
 
       </div>
