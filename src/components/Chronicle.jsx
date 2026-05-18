@@ -5,13 +5,24 @@ import { MapContainer, TileLayer, Marker, useMap, Circle } from 'react-leaflet'
 import { History, Clock, MapPin, Loader2, AlertTriangle, Sparkles, ChevronLeft, Menu, X, RefreshCw, Search } from 'lucide-react'
 import L from 'leaflet'
 
-function MapController({ coords, zoom }) {
+function MapController({ coords, zoom, isSidebarOpen }) {
   const map = useMap()
+  
   useEffect(() => {
     if (coords && typeof coords[0] === 'number' && typeof coords[1] === 'number') {
       map.flyTo(coords, zoom, { duration: 2, easeLinearity: 0.25 })
     }
   }, [coords, zoom, map])
+
+  // Fix Leaflet sizing/offset glitch when component mounts or sidebar toggles
+  useEffect(() => {
+    map.invalidateSize()
+    const timer = setTimeout(() => {
+      map.invalidateSize()
+    }, 350) // wait for 0.3s CSS transition to finish
+    return () => clearTimeout(timer)
+  }, [map, isSidebarOpen])
+
   return null
 }
 
@@ -530,7 +541,7 @@ const Chronicle = ({ lastUpdated }) => {
 
           <MapContainer key={selectedEvent.id} center={[activeStep.lat, activeStep.lng]} zoom={activeStep.zoom} style={{ height: '100%', width: '100%' }}>
             <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" />
-            <MapController coords={[activeStep.lat, activeStep.lng]} zoom={activeStep.zoom} />
+            <MapController coords={[activeStep.lat, activeStep.lng]} zoom={activeStep.zoom} isSidebarOpen={isSidebarOpen} />
 
             <Circle
               center={[activeStep.lat, activeStep.lng]}
