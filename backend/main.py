@@ -24,7 +24,8 @@ app.add_middleware(
 _cache = {"events": [], "fetched_at": None}
 
 # Persistent File Cache for AI stories to prevent repeated Gemini API calls on hot-reload/restart
-CACHE_FILE = "chronicles_cache.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CACHE_FILE = os.path.join(BASE_DIR, "chronicles_cache.json")
 
 def load_hist_cache():
     if os.path.exists(CACHE_FILE):
