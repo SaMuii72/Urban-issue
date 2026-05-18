@@ -1,0 +1,22 @@
+name: Keep Backend Alive
+
+on:
+  schedule:
+    # รันทุกๆ 14 นาที เพื่อป้องกัน Render Free Tier เข้าสู่โหมด Sleep (ซึ่งจะหลับทุก 15 นาที)
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # อนุญาตให้กดรันแบบ Manual ได้ในหน้าเว็บ GitHub
+
+jobs:
+  ping-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render Backend API
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '1s' # หน่วงเวลาเล็กน้อย
+      
+      - name: Check Backend Status
+        run: |
+          # ตรงนี้เราจะใส่ URL ของ Render ไว้ชั่วคราว (คุณสามารถกลับมาแก้เป็น URL จริงได้ภายหลัง)
+          # API endpoint /api/events เป็น endpoint ที่เบาที่สุด เหมาะแก่การ Ping
+          curl -f "https://YOUR_RENDER_URL.onrender.com/api/events" || echo "Backend ping failed, but workflow continues."
