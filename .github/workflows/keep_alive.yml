@@ -19,4 +19,4 @@ jobs:
         run: |
           # ตรงนี้เราจะใส่ URL ของ Render ไว้ชั่วคราว (คุณสามารถกลับมาแก้เป็น URL จริงได้ภายหลัง)
           # API endpoint /api/events เป็น endpoint ที่เบาที่สุด เหมาะแก่การ Ping
-          curl -f "https://YOUR_RENDER_URL.onrender.com/api/events" || echo "Backend ping failed, but workflow continues."
+          curl -f "https://urban-issue.onrender.com" || echo "Backend ping failed, but workflow continues."
