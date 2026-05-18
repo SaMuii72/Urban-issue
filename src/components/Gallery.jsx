@@ -74,7 +74,7 @@ const Gallery = ({ events, selectedId, onSelect }) => {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', color: '#7a8a9e', fontWeight: 500 }}>
                 <Calendar size={12} />
-                {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                {new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', color: '#7a8a9e', fontWeight: 500 }}>
                 <MapPin size={12} />

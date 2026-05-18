@@ -11,7 +11,7 @@ import Analytics from './components/Analytics'
 import Chronicle from './components/Chronicle'
 
 function App() {
-  const { events, lastUpdated, loading, error, refresh } = useEvents()
+  const { events, lastUpdated, loading, error, refresh, autoRefresh, setAutoRefresh } = useEvents()
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [filter, setFilter] = useState('all')
   const [severityFilter, setSeverityFilter] = useState('all')
@@ -103,6 +103,8 @@ function App() {
         setDateFilter={setDateFilter}
         page={page}
         setPage={setPage}
+        autoRefresh={autoRefresh}
+        setAutoRefresh={setAutoRefresh}
       />
 
       {/* สลับระหว่าง Dashboard กับ Data Story */}
@@ -143,7 +145,7 @@ function App() {
         </div>
       ) : page === 'chronicle' ? (
         // 🌟 เพิ่มเงื่อนไขนี้ เพื่อแสดงหน้า Historical Narrative เมื่อกดแท็บ History
-        <div className="page-content" style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
           <Chronicle lastUpdated={lastUpdated} />
         </div>
       ) : (

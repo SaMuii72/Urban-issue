@@ -26,13 +26,13 @@ export const getCategoryStyles = (category) => {
 }
 
 // ── Sub-components (Defined outside to prevent focus loss and unnecessary re-mounting) ──
-const UpdateControls = ({ lastUpdated, onRefresh, isMobile }) => (
+const UpdateControls = ({ lastUpdated, onRefresh, isMobile, autoRefresh, setAutoRefresh }) => (
   <div style={{
     display: 'flex',
     flexDirection: isMobile ? 'column' : 'row',
-    alignItems: isMobile ? 'center' : 'center',
-    gap: isMobile ? '0.35rem' : '0.75rem',
-    width: isMobile ? 'auto' : 'auto',
+    alignItems: 'center',
+    gap: isMobile ? '0.5rem' : '0.75rem',
+    width: 'auto',
     justifyContent: isMobile ? 'center' : 'flex-end'
   }}>
     <div style={{ fontSize: 10, color: '#7a8a9e', textAlign: isMobile ? 'center' : 'right', lineHeight: 1.2 }}>
@@ -43,28 +43,62 @@ const UpdateControls = ({ lastUpdated, onRefresh, isMobile }) => (
           : '--:--'}
       </div>
     </div>
-    <button
-      onClick={onRefresh}
-      style={{
-        fontSize: 10, padding: '3px 10px', borderRadius: 6,
-        border: '1px solid rgba(255,255,255,0.1)',
-        background: 'rgba(255,255,255,0.05)',
-        color: '#94a3b8', cursor: 'pointer', fontWeight: 600,
-        letterSpacing: '0.02em', transition: 'all 0.2s',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.background = 'rgba(245,158,11,0.12)'
-        e.currentTarget.style.borderColor = 'rgba(245,158,11,0.35)'
-        e.currentTarget.style.color = '#fcd34d'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
-        e.currentTarget.style.color = '#94a3b8'
-      }}
-    >
-      ↻ Refresh
-    </button>
+    
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.02)', padding: '2px 8px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' }}>
+      <button
+        onClick={onRefresh}
+        style={{
+          fontSize: 10, padding: '3px 8px', borderRadius: 6,
+          border: 'none',
+          background: 'rgba(255,255,255,0.04)',
+          color: '#94a3b8', cursor: 'pointer', fontWeight: 600,
+          letterSpacing: '0.02em', transition: 'all 0.2s',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.background = 'rgba(245,158,11,0.12)'
+          e.currentTarget.style.color = '#fcd34d'
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+          e.currentTarget.style.color = '#94a3b8'
+        }}
+      >
+        ↻ Refresh
+      </button>
+      
+      <div style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.08)' }} />
+      
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+        <span style={{ fontSize: 9, fontWeight: 700, color: '#7a8a9e', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Auto</span>
+        <button
+          onClick={() => setAutoRefresh(!autoRefresh)}
+          style={{
+            width: '28px',
+            height: '16px',
+            borderRadius: '999px',
+            background: autoRefresh ? '#f59e0b' : 'rgba(255,255,255,0.12)',
+            border: 'none',
+            padding: '2px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: autoRefresh ? 'flex-end' : 'flex-start',
+            transition: 'background-color 0.2s ease, justify-content 0.2s ease',
+            outline: 'none',
+            boxShadow: autoRefresh ? '0 0 8px rgba(245, 158, 11, 0.35)' : 'none'
+          }}
+        >
+          <div style={{
+            width: '12px',
+            height: '12px',
+            borderRadius: '50%',
+            background: '#0d1117',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.4)',
+            transition: 'all 0.2s ease'
+          }} />
+        </button>
+      </div>
+    </div>
   </div>
 )
 
@@ -166,7 +200,7 @@ const Logo = () => (
   </div>
 )
 
-const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, setFilter, severityFilter, setSeverityFilter, searchQuery, setSearchQuery, dateFilter, setDateFilter, page, setPage }) => {
+const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, setFilter, severityFilter, setSeverityFilter, searchQuery, setSearchQuery, dateFilter, setDateFilter, page, setPage, autoRefresh, setAutoRefresh }) => {
   const [showFilters, setShowFilters] = useState(false)
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024)
   const [isTablet, setIsTablet] = useState(window.innerWidth > 768 && window.innerWidth <= 1024)
@@ -283,7 +317,7 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
           borderLeft: '1px solid rgba(255,255,255,0.06)', paddingLeft: '1.5rem'
         }}>
           {StatsComponent}
-          <UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} isMobile={false} />
+          <UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} isMobile={false} autoRefresh={autoRefresh} setAutoRefresh={setAutoRefresh} />
         </div>
       </header>
     )
@@ -316,7 +350,7 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', gap: '1.5rem' }}>
             {StatsComponent}
-            <UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} isMobile={isMobile} />
+            <UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} isMobile={isMobile} autoRefresh={autoRefresh} setAutoRefresh={setAutoRefresh} />
           </div>
         </div>
       )}
@@ -331,7 +365,7 @@ const Header = ({ events = [], StatsComponent, lastUpdated, onRefresh, filter, s
                 <FilterToggleButton showFilters={showFilters} setShowFilters={setShowFilters} />
               )}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}><UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} isMobile={false} /></div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}><UpdateControls lastUpdated={lastUpdated} onRefresh={onRefresh} isMobile={false} autoRefresh={autoRefresh} setAutoRefresh={setAutoRefresh} /></div>
           </>
         ) : (
           <>

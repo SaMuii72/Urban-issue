@@ -6,6 +6,11 @@ export function useEvents(refreshInterval = 5 * 60 * 1000) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const [autoRefresh, setAutoRefresh] = useState(() => {
+    const saved = localStorage.getItem('auto_refresh_events')
+    return saved !== null ? JSON.parse(saved) : true
+  })
+
   // ใช้ useCallback เพื่อจำฟังก์ชันไว้ และรับค่า isManualRefresh
   const fetchEvents = useCallback(async (isManualRefresh = false) => {
     try {
@@ -34,12 +39,18 @@ export function useEvents(refreshInterval = 5 * 60 * 1000) {
 
   useEffect(() => {
     fetchEvents() // ทำงานครั้งแรก (ไม่บังคับ refresh)
+  }, [fetchEvents])
+
+  useEffect(() => {
+    localStorage.setItem('auto_refresh_events', JSON.stringify(autoRefresh))
+    if (!autoRefresh) return
+
     const interval = setInterval(() => fetchEvents(false), refreshInterval)
     return () => clearInterval(interval)
-  }, [fetchEvents, refreshInterval])
+  }, [fetchEvents, refreshInterval, autoRefresh])
 
   // ฟังก์ชันนี้จะถูกส่งไปให้ปุ่มบน Header
   const manualRefresh = () => fetchEvents(true)
 
-  return { events, lastUpdated, loading, error, refresh: manualRefresh }
+  return { events, lastUpdated, loading, error, refresh: manualRefresh, autoRefresh, setAutoRefresh }
 }
